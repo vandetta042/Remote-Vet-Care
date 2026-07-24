@@ -1,5 +1,7 @@
 import PortalLayout from '@/Layouts/PortalLayout';
-import { Head } from '@inertiajs/react';
+import OwnerLayout from '@/Layouts/OwnerLayout';
+import VetLayout from '@/Layouts/VetLayout';
+import { Head, Link } from '@inertiajs/react';
 
 function statToneClasses(tone) {
     switch (tone) {
@@ -14,6 +16,45 @@ function statToneClasses(tone) {
     }
 }
 
+function ActionCard({ item }) {
+    const classes =
+        'group block rounded-3xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-900';
+
+    if (typeof item.href === 'string' && item.href.startsWith('#')) {
+        return (
+            <a href={item.href} className={classes}>
+                <div className="flex items-center justify-between gap-4">
+                    <h3 className="text-lg font-semibold text-stone-900">
+                        {item.label}
+                    </h3>
+                    <span className="text-stone-400 transition group-hover:text-stone-900">
+                        {'->'}
+                    </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-stone-600">
+                    {item.description}
+                </p>
+            </a>
+        );
+    }
+
+    return (
+        <Link href={item.href} className={classes}>
+            <div className="flex items-center justify-between gap-4">
+                <h3 className="text-lg font-semibold text-stone-900">
+                    {item.label}
+                </h3>
+                <span className="text-stone-400 transition group-hover:text-stone-900">
+                    {'->'}
+                </span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-stone-600">
+                {item.description}
+            </p>
+        </Link>
+    );
+}
+
 export default function Dashboard({
     title,
     roleLabel,
@@ -22,6 +63,158 @@ export default function Dashboard({
     quickLinks,
     spotlight,
 }) {
+    const isOwner = roleLabel === 'Animal Owner';
+    const isVet = roleLabel === 'Veterinarian';
+
+    const sharedStats = (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {stats.map((stat) => (
+                <div
+                    key={stat.label}
+                    className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                >
+                    <span
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ring-1 ${statToneClasses(stat.tone)}`}
+                    >
+                        {stat.label}
+                    </span>
+                    <p className="mt-5 text-4xl font-semibold text-stone-900">
+                        {stat.value}
+                    </p>
+                </div>
+            ))}
+        </div>
+    );
+
+    if (isOwner) {
+        return (
+            <OwnerLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Start Here
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Choose what you want to do next
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                The buttons below lead to the most common animal
+                                care tasks. Pick one and continue from there.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section
+                        id="emergency-signs"
+                        className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm"
+                    >
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-amber-700">
+                                Emergency Signs
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Call for urgent help right away if you notice these
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-700">
+                                These signs do not replace a vet, but they are a
+                                strong reason to seek immediate care.
+                            </p>
+                        </div>
+
+                        <div className="mt-5 grid gap-3 md:grid-cols-2">
+                            {[
+                                'Trouble breathing or noisy breathing',
+                                'Can not stand, collapse, or extreme weakness',
+                                'Seizures, convulsions, or sudden confusion',
+                                'Heavy bleeding or deep wounds',
+                                'Repeated vomiting, diarrhea, or swelling',
+                                'Not eating or drinking for a long time',
+                            ].map((item) => (
+                                <div
+                                    key={item}
+                                    className="rounded-2xl border border-amber-200 bg-white p-4 text-sm leading-6 text-stone-700"
+                                >
+                                    {item}
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </OwnerLayout>
+        );
+    }
+
+    if (isVet) {
+        return (
+            <VetLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Triage
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Jump into the right queue
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Use these actions to open the queue, find
+                                emergencies, or check which cases still need a
+                                response.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </VetLayout>
+        );
+    }
+
     return (
         <PortalLayout
             title={title}
@@ -39,8 +232,8 @@ export default function Dashboard({
                         </p>
                     </div>
                     <div className="rounded-2xl bg-stone-900 px-5 py-4 text-sm text-stone-100">
-                        This portal foundation is live, and the linked
-                        workflow pages are ready for use.
+                        This portal stays available for the more technical
+                        roles in the system.
                     </div>
                 </div>
             }
@@ -77,29 +270,13 @@ export default function Dashboard({
                             </h3>
                         </div>
                         <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
-                            Phase 2
+                            Current Phase
                         </span>
                     </div>
 
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                         {quickLinks.map((item) => (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                className="group rounded-2xl border border-stone-200 bg-stone-50 p-5 transition hover:border-stone-900 hover:bg-white"
-                            >
-                                <div className="flex items-center justify-between gap-4">
-                                    <h4 className="text-lg font-semibold text-stone-900">
-                                        {item.label}
-                                    </h4>
-                                    <span className="text-stone-400 transition group-hover:text-stone-900">
-                                        {'->'}
-                                    </span>
-                                </div>
-                                <p className="mt-3 text-sm leading-6 text-stone-600">
-                                    {item.description}
-                                </p>
-                            </a>
+                            <ActionCard key={item.label} item={item} />
                         ))}
                     </div>
                 </section>

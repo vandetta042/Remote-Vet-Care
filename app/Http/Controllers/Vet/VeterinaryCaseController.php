@@ -23,7 +23,7 @@ class VeterinaryCaseController extends Controller
     public function index(): Response
     {
         $cases = VeterinaryCase::query()
-            ->with(['animal.species:id,name', 'owner:id,name,email', 'assignedVet:id,name'])
+            ->with(['animal.species:id,name', 'owner:id,name,email', 'assignedVet:id,name', 'symptoms:id,name,severity_level'])
             ->latest()
             ->get();
 

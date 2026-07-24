@@ -1,72 +1,38 @@
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import OwnerLayout from '@/Layouts/OwnerLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Show({ animal, recentCases }) {
     return (
-        <PortalLayout
+        <OwnerLayout
             title={animal.name}
-            header={
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
-                            Animal Profile
-                        </p>
-                        <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            {animal.name}
-                        </h2>
-                        <p className="mt-2 text-sm text-stone-600">
-                            {animal.species?.name} {animal.breed ? `• ${animal.breed.name}` : ''}
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Link
-                            href={route('owner.cases.create')}
-                            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
-                        >
-                            Submit Case
-                        </Link>
-                        <Link
-                            href={route('owner.animals.edit', animal.id)}
-                            className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-                        >
-                            Edit Animal
-                        </Link>
-                    </div>
-                </div>
-            }
+            subtitle="Review the animal profile and jump into a new care request if something looks wrong."
         >
             <Head title={animal.name} />
 
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
                 <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold text-stone-900">
-                        Animal Details
-                    </h3>
+                    <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                        Animal Profile
+                    </p>
+                    <h2 className="mt-2 text-3xl font-semibold text-stone-900">
+                        {animal.name}
+                    </h2>
+                    <p className="mt-2 text-sm text-stone-600">
+                        {animal.species?.name}
+                        {animal.breed ? ` - ${animal.breed.name}` : ''}
+                    </p>
+
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                         <Info label="Age" value={animal.age ?? 'Not specified'} />
-                        <Info
-                            label="Age Group"
-                            value={animal.age_group ?? 'Not specified'}
-                        />
-                        <Info
-                            label="Gender"
-                            value={animal.gender ?? 'Not specified'}
-                        />
-                        <Info
-                            label="Weight"
-                            value={animal.weight ? `${animal.weight} kg` : 'Not specified'}
-                        />
+                        <Info label="Age Group" value={animal.age_group ?? 'Not specified'} />
+                        <Info label="Gender" value={animal.gender ?? 'Not specified'} />
+                        <Info label="Weight" value={animal.weight ? `${animal.weight} kg` : 'Not specified'} />
                         <Info label="Color" value={animal.color ?? 'Not specified'} />
-                        <Info
-                            label="Vaccination"
-                            value={animal.vaccination_status ?? 'Not specified'}
-                        />
-                        <Info
-                            label="Location"
-                            value={animal.location ?? 'Not specified'}
-                        />
+                        <Info label="Vaccination" value={animal.vaccination_status ?? 'Not specified'} />
+                        <Info label="Location" value={animal.location ?? 'Not specified'} />
                     </div>
+
                     <div className="mt-6 rounded-2xl bg-stone-50 p-4">
                         <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
                             Medical History
@@ -78,13 +44,21 @@ export default function Show({ animal, recentCases }) {
                 </section>
 
                 <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-                    <h3 className="text-xl font-semibold text-stone-900">
-                        Recent Cases
-                    </h3>
+                    <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-xl font-semibold text-stone-900">
+                            Recent Care Requests
+                        </h3>
+                        <Link
+                            href={route('owner.cases.create')}
+                            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
+                        >
+                            Report a Sick Animal
+                        </Link>
+                    </div>
                     <div className="mt-5 space-y-4">
                         {recentCases.length === 0 ? (
                             <p className="text-sm leading-6 text-stone-600">
-                                No care cases have been submitted for this animal yet.
+                                No care requests have been submitted for this animal yet.
                             </p>
                         ) : (
                             recentCases.map((item) => (
@@ -111,7 +85,7 @@ export default function Show({ animal, recentCases }) {
                     </div>
                 </section>
             </div>
-        </PortalLayout>
+        </OwnerLayout>
     );
 }
 

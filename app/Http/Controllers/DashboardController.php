@@ -33,25 +33,27 @@ class DashboardController extends Controller
         $user = $request->user();
 
         return $this->renderDashboard(
-            title: 'Owner Dashboard',
+            title: 'Home',
             roleLabel: 'Animal Owner',
-            description: 'Track your animals, submit remote care cases, and monitor veterinarian responses.',
+            description: 'What do you want to do for your animal today?',
             stats: [
-                ['label' => 'Total Animals', 'value' => Animal::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
-                ['label' => 'Total Cases', 'value' => VeterinaryCase::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
-                ['label' => 'Pending Cases', 'value' => VeterinaryCase::where('owner_id', $user->id)->whereIn('status', ['submitted', 'under_review'])->count(), 'tone' => 'warning'],
-                ['label' => 'Vet Responded', 'value' => VeterinaryCase::where('owner_id', $user->id)->where('status', 'vet_responded')->count(), 'tone' => 'success'],
-                ['label' => 'Emergency Cases', 'value' => VeterinaryCase::where('owner_id', $user->id)->where('urgency_level', 'emergency')->count(), 'tone' => 'danger'],
+                ['label' => 'Animals Registered', 'value' => Animal::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
+                ['label' => 'Care Requests', 'value' => VeterinaryCase::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
+                ['label' => 'Waiting for Vet', 'value' => VeterinaryCase::where('owner_id', $user->id)->whereIn('status', ['submitted', 'under_review'])->count(), 'tone' => 'warning'],
+                ['label' => 'Vet Replies', 'value' => VeterinaryCase::where('owner_id', $user->id)->where('status', 'vet_responded')->count(), 'tone' => 'success'],
+                ['label' => 'Emergency Signs', 'value' => VeterinaryCase::where('owner_id', $user->id)->where('urgency_level', 'emergency')->count(), 'tone' => 'danger'],
             ],
             quickLinks: [
-                ['label' => 'My Animals', 'href' => route('owner.animals.index'), 'description' => 'Create, review, and update animal profiles before submitting cases.'],
-                ['label' => 'Submit New Case', 'href' => route('owner.cases.create'), 'description' => 'Send symptoms, case description, and attachments for remote review.'],
-                ['label' => 'Case History', 'href' => route('owner.cases.index'), 'description' => 'Review status, urgency level, and future vet responses.'],
+                ['label' => 'Report a Sick Animal', 'href' => route('owner.cases.create'), 'description' => 'Share the signs you noticed, the details, and any photo or document you want the vet to see.'],
+                ['label' => 'My Animals', 'href' => route('owner.animals.index'), 'description' => 'Keep each animal profile ready for faster care requests.'],
+                ['label' => 'My Care Requests', 'href' => route('owner.cases.index'), 'description' => 'See every request, current status, and any updates from the vet.'],
+                ['label' => 'Vet Replies', 'href' => route('owner.cases.index'), 'description' => "Open a care request to read the vet's advice and next steps."],
+                ['label' => 'Emergency Signs', 'href' => '#emergency-signs', 'description' => 'Check the warning signs that need urgent help right away.'],
             ],
             spotlight: [
-                'You already have the correct role-based entry point and protected owner area.',
-                'Animal registration and case submission workflows are now active.',
-                'All diagnosis results will later include a safety disclaimer before vet review.',
+                'Use the big action cards above when you want to start quickly.',
+                "Each care request will show a system suggestion, then the veterinarian's advice.",
+                'The emergency section explains when to seek urgent help right away.',
             ],
         );
     }
@@ -59,25 +61,26 @@ class DashboardController extends Controller
     public function vet(): Response
     {
         return $this->renderDashboard(
-            title: 'Veterinarian Dashboard',
+            title: 'Dashboard',
             roleLabel: 'Veterinarian',
-            description: 'Review submitted cases, validate system suggestions, and provide care guidance.',
+            description: 'Sort new care requests, check emergencies first, and respond with clear advice.',
             stats: [
-                ['label' => 'Submitted Cases', 'value' => VeterinaryCase::where('status', 'submitted')->count(), 'tone' => 'warning'],
-                ['label' => 'Under Review', 'value' => VeterinaryCase::where('status', 'under_review')->count(), 'tone' => 'neutral'],
-                ['label' => 'Urgent Cases', 'value' => VeterinaryCase::whereIn('urgency_level', ['high', 'emergency'])->count(), 'tone' => 'danger'],
-                ['label' => 'Responded Cases', 'value' => VeterinaryCase::where('status', 'vet_responded')->count(), 'tone' => 'success'],
+                ['label' => 'New Care Requests', 'value' => VeterinaryCase::where('status', 'submitted')->count(), 'tone' => 'warning'],
+                ['label' => 'Waiting for Vet Response', 'value' => VeterinaryCase::where('status', 'under_review')->count(), 'tone' => 'neutral'],
+                ['label' => 'Emergency Cases', 'value' => VeterinaryCase::whereIn('urgency_level', ['high', 'emergency'])->count(), 'tone' => 'danger'],
+                ['label' => 'Vet Replied', 'value' => VeterinaryCase::where('status', 'vet_responded')->count(), 'tone' => 'success'],
                 ['label' => 'Resolved Cases', 'value' => VeterinaryCase::whereIn('status', ['resolved', 'closed'])->count(), 'tone' => 'neutral'],
             ],
             quickLinks: [
-                ['label' => 'Case Queue', 'href' => route('vet.cases.index'), 'description' => 'Open submitted and under-review cases from one working queue.'],
-                ['label' => 'Animal Profiles', 'href' => route('vet.cases.index'), 'description' => 'Each case now exposes the owner, animal history, and supporting attachments.'],
-                ['label' => 'Care Responses', 'href' => route('vet.cases.index'), 'description' => 'Record diagnosis, advice, follow-up date, assignment, and case status updates.'],
+                ['label' => 'New Care Requests', 'href' => route('vet.cases.index'), 'description' => 'Open the newest requests waiting for your review.'],
+                ['label' => 'Emergency Cases', 'href' => route('vet.cases.index', ['filter' => 'emergency']), 'description' => 'Jump straight to the highest-priority animals.'],
+                ['label' => 'Waiting for Vet Response', 'href' => route('vet.cases.index', ['filter' => 'waiting']), 'description' => 'Review requests still awaiting a response.'],
+                ['label' => 'Resolved Cases', 'href' => route('vet.cases.index', ['filter' => 'resolved']), 'description' => 'See completed care requests and prior advice.'],
             ],
             spotlight: [
-                'This dashboard is protected so only veterinarian accounts can enter it.',
-                'The case response workflow is now connected to the submitted diagnosis-ready cases.',
-                'Urgent and emergency case counters are already wired to the domain schema.',
+                'New requests and emergency cases should be handled first.',
+                'The case screen keeps the animal profile, signs noticed, and attachments together.',
+                'Your diagnosis and advice are saved back to the same care request for the owner to read.',
             ],
         );
     }

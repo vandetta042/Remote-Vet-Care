@@ -1,32 +1,29 @@
 import EmptyState from '@/Components/EmptyState';
 import SecondaryButton from '@/Components/SecondaryButton';
-import PortalLayout from '@/Layouts/PortalLayout';
+import OwnerLayout from '@/Layouts/OwnerLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Index({ animals }) {
     return (
-        <PortalLayout
+        <OwnerLayout
             title="My Animals"
-            header={
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
-                            Animal Owner
-                        </p>
-                        <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            My Animals
-                        </h2>
-                        <p className="mt-2 text-sm leading-6 text-stone-600">
-                            Keep animal profiles up to date before submitting remote care cases.
-                        </p>
-                    </div>
-                    <Link href={route('owner.animals.create')}>
-                        <SecondaryButton>Add Animal</SecondaryButton>
-                    </Link>
-                </div>
-            }
+            subtitle="Keep animal profiles up to date before sending a care request."
         >
             <Head title="My Animals" />
+
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                        Animal Profiles
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-stone-900">
+                        Keep every animal ready for care
+                    </h2>
+                </div>
+                <Link href={route('owner.animals.create')}>
+                    <SecondaryButton>Add Animal</SecondaryButton>
+                </Link>
+            </div>
 
             {animals.length === 0 ? (
                 <EmptyState
@@ -72,6 +69,6 @@ export default function Index({ animals }) {
                     ))}
                 </div>
             )}
-        </PortalLayout>
+        </OwnerLayout>
     );
 }

@@ -27,7 +27,7 @@ class VeterinaryCaseController extends Controller
     public function index(Request $request): Response
     {
         $cases = VeterinaryCase::query()
-            ->with(['animal:id,name', 'assignedVet:id,name'])
+            ->with(['animal:id,name', 'assignedVet:id,name', 'symptoms:id,name,severity_level'])
             ->where('owner_id', $request->user()->id)
             ->latest()
             ->get();

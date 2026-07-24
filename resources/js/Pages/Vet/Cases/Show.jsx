@@ -1,6 +1,6 @@
 import InputError from '@/Components/InputError';
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import VetLayout from '@/Layouts/VetLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
@@ -18,40 +18,41 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
     };
 
     return (
-        <PortalLayout
-            title={veterinaryCase.title}
-            header={
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
-                            Veterinarian Workflow
-                        </p>
-                        <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            Review Case
-                        </h2>
-                        <p className="mt-2 text-sm text-stone-600">
-                            {veterinaryCase.animal?.name} {' • '}{veterinaryCase.animal?.species?.name}
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                        <StatusBadge value={veterinaryCase.status} />
-                        <StatusBadge value={veterinaryCase.urgency_level} />
-                    </div>
-                </div>
-            }
+        <VetLayout
+            title="Review Request"
+            subtitle="Check the owner report, compare the possible cause, and enter your clinical response."
         >
-            <Head title="Review Case" />
+            <Head title="Review Request" />
 
             <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
                 <section className="space-y-6">
-                    <Panel title="Owner and Animal Information">
+                    <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                            Care Request
+                        </p>
+                        <h2 className="mt-2 text-3xl font-semibold text-stone-900">
+                            {veterinaryCase.title}
+                        </h2>
+                        <p className="mt-2 text-sm text-stone-600">
+                            {veterinaryCase.animal?.name}
+                            {' - '}
+                            {veterinaryCase.animal?.species?.name}
+                        </p>
+
+                        <div className="mt-5 flex flex-wrap gap-3">
+                            <StatusBadge value={veterinaryCase.status} />
+                            <StatusBadge value={veterinaryCase.urgency_level} />
+                        </div>
+                    </div>
+
+                    <Panel title="Animal Profile">
                         <div className="grid gap-4 md:grid-cols-2">
                             <Info label="Owner" value={veterinaryCase.owner?.name ?? 'Unknown'} />
                             <Info label="Owner Email" value={veterinaryCase.owner?.email ?? 'Not available'} />
                             <Info label="Phone" value={veterinaryCase.owner?.phone ?? 'Not available'} />
                             <Info label="Address" value={veterinaryCase.owner?.address ?? 'Not available'} />
                             <Info label="Breed" value={veterinaryCase.animal?.breed?.name ?? 'Not specified'} />
-                            <Info label="Animal Age" value={veterinaryCase.animal?.age ?? 'Not specified'} />
+                            <Info label="Age" value={veterinaryCase.animal?.age ?? 'Not specified'} />
                             <Info label="Gender" value={veterinaryCase.animal?.gender ?? 'Not specified'} />
                             <Info label="Weight" value={veterinaryCase.animal?.weight ? `${veterinaryCase.animal.weight} kg` : 'Not specified'} />
                         </div>
@@ -65,10 +66,10 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                         </div>
                     </Panel>
 
-                    <Panel title="Case Description">
+                    <Panel title="Owner Complaint">
                         <div className="grid gap-4 md:grid-cols-2">
-                            <Info label="Duration" value={veterinaryCase.duration ?? 'Not specified'} />
-                            <Info label="Location" value={veterinaryCase.location ?? 'Not specified'} />
+                            <Info label="How long it has been happening" value={veterinaryCase.duration ?? 'Not specified'} />
+                            <Info label="Where the animal is" value={veterinaryCase.location ?? 'Not specified'} />
                         </div>
                         <div className="mt-4 rounded-2xl bg-stone-50 p-4">
                             <p className="text-sm leading-6 text-stone-700">
@@ -77,22 +78,22 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                         </div>
                     </Panel>
 
-                    <Panel title="System Suggestion">
+                    <Panel title="Possible Cause Suggested by System">
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                             <p className="text-xs uppercase tracking-[0.2em] text-amber-700">
-                                Preliminary system summary
+                                Summary
                             </p>
                             <p className="mt-2 text-sm leading-6 text-amber-900">
-                                {veterinaryCase.system_suggestion_summary}
+                                {veterinaryCase.system_suggestion_summary || 'No possible cause was generated yet.'}
                             </p>
                             <p className="mt-3 text-sm leading-6 text-stone-700">
-                                {veterinaryCase.system_explanation}
+                                {veterinaryCase.system_explanation || 'The full explanation will appear here once the case is processed.'}
                             </p>
                         </div>
                         <div className="mt-4 space-y-4">
                             {veterinaryCase.system_matches.length === 0 ? (
                                 <p className="text-sm text-stone-600">
-                                    No system matches were stored for this case.
+                                    No rule-based matches were stored for this request.
                                 </p>
                             ) : (
                                 veterinaryCase.system_matches.map((match) => (
@@ -124,27 +125,33 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                         </div>
                     </Panel>
 
-                    <Panel title="Symptoms, Risk Factors, and Attachments">
-                        <div className="space-y-4">
+                    <Panel title="Signs, Risk Factors, and Files">
+                        <div className="space-y-5">
                             <div>
                                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                    Symptoms
+                                    Signs noticed
                                 </p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                    {veterinaryCase.symptoms.map((item) => (
-                                        <span
-                                            key={item.id}
-                                            className="rounded-full bg-stone-100 px-3 py-2 text-sm text-stone-700"
-                                        >
-                                            {item.name} ({item.severity_level})
+                                    {veterinaryCase.symptoms.length === 0 ? (
+                                        <span className="text-sm text-stone-600">
+                                            No signs were selected.
                                         </span>
-                                    ))}
+                                    ) : (
+                                        veterinaryCase.symptoms.map((item) => (
+                                            <span
+                                                key={item.id}
+                                                className="rounded-full bg-stone-100 px-3 py-2 text-sm text-stone-700"
+                                            >
+                                                {item.name} ({item.severity_level})
+                                            </span>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 
                             <div>
                                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                    Risk Factors
+                                    Risk factors
                                 </p>
                                 <div className="mt-3 flex flex-wrap gap-2">
                                     {veterinaryCase.risk_factors.length === 0 ? (
@@ -166,12 +173,12 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
 
                             <div>
                                 <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                    Attachments
+                                    Uploaded files
                                 </p>
                                 <div className="mt-3 space-y-3">
                                     {veterinaryCase.attachment_urls.length === 0 ? (
                                         <p className="text-sm text-stone-600">
-                                            No attachments uploaded for this case.
+                                            No files were uploaded.
                                         </p>
                                     ) : (
                                         veterinaryCase.attachment_urls.map((item) => (
@@ -198,11 +205,11 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                 </section>
 
                 <section className="space-y-6">
-                    <Panel title="Veterinary Response">
+                    <Panel title="Vet Response">
                         <form onSubmit={submit} className="space-y-4">
                             <Field label="Assigned Vet" error={errors.assigned_vet_id}>
                                 <select
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="mt-1 block w-full rounded-xl border-stone-300 shadow-sm focus:border-stone-900 focus:ring-stone-900"
                                     value={data.assigned_vet_id}
                                     onChange={(e) => setData('assigned_vet_id', e.target.value)}
                                 >
@@ -215,40 +222,40 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                                 </select>
                             </Field>
 
-                            <Field label="Case Status" error={errors.status}>
+                            <Field label="Status update" error={errors.status}>
                                 <select
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="mt-1 block w-full rounded-xl border-stone-300 shadow-sm focus:border-stone-900 focus:ring-stone-900"
                                     value={data.status}
                                     onChange={(e) => setData('status', e.target.value)}
                                 >
                                     {statusOptions.map((status) => (
                                         <option key={status} value={status}>
-                                            {status}
+                                            {status.replaceAll('_', ' ')}
                                         </option>
                                     ))}
                                 </select>
                             </Field>
 
-                            <Field label="Veterinary Diagnosis" error={errors.vet_diagnosis}>
+                            <Field label="Vet's diagnosis" error={errors.vet_diagnosis}>
                                 <textarea
-                                    className="mt-1 block min-h-40 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="mt-1 block min-h-36 w-full rounded-xl border-stone-300 shadow-sm focus:border-stone-900 focus:ring-stone-900"
                                     value={data.vet_diagnosis}
                                     onChange={(e) => setData('vet_diagnosis', e.target.value)}
                                 />
                             </Field>
 
-                            <Field label="Veterinary Advice" error={errors.vet_advice}>
+                            <Field label="Vet's advice" error={errors.vet_advice}>
                                 <textarea
-                                    className="mt-1 block min-h-40 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="mt-1 block min-h-36 w-full rounded-xl border-stone-300 shadow-sm focus:border-stone-900 focus:ring-stone-900"
                                     value={data.vet_advice}
                                     onChange={(e) => setData('vet_advice', e.target.value)}
                                 />
                             </Field>
 
-                            <Field label="Follow-up Date" error={errors.follow_up_date}>
+                            <Field label="Check again on" error={errors.follow_up_date}>
                                 <input
                                     type="date"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="mt-1 block w-full rounded-xl border-stone-300 shadow-sm focus:border-stone-900 focus:ring-stone-900"
                                     value={data.follow_up_date}
                                     onChange={(e) => setData('follow_up_date', e.target.value)}
                                 />
@@ -259,27 +266,27 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                                 disabled={processing}
                                 className="rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-stone-700 disabled:opacity-50"
                             >
-                                Save Veterinary Response
+                                Save Vet Response
                             </button>
                         </form>
                     </Panel>
 
-                    <Panel title="Current Response Snapshot">
+                    <Panel title="Current Response">
                         <Info label="Assigned Vet" value={veterinaryCase.assigned_vet?.name ?? 'Not assigned'} />
                         <div className="mt-4 rounded-2xl bg-stone-50 p-4">
                             <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                Current Diagnosis
+                                Diagnosis
                             </p>
                             <p className="mt-2 text-sm leading-6 text-stone-700">
-                                {veterinaryCase.vet_diagnosis || 'No veterinary diagnosis recorded yet.'}
+                                {veterinaryCase.vet_diagnosis || 'No diagnosis recorded yet.'}
                             </p>
                         </div>
                         <div className="mt-4 rounded-2xl bg-stone-50 p-4">
                             <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                Current Advice
+                                Advice
                             </p>
                             <p className="mt-2 text-sm leading-6 text-stone-700">
-                                {veterinaryCase.vet_advice || 'No veterinary advice recorded yet.'}
+                                {veterinaryCase.vet_advice || 'No advice recorded yet.'}
                             </p>
                         </div>
                     </Panel>
@@ -289,12 +296,12 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                             href={route('vet.cases.index')}
                             className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
                         >
-                            Back to Case Queue
+                            Back to Care Requests
                         </Link>
                     </div>
                 </section>
             </div>
-        </PortalLayout>
+        </VetLayout>
     );
 }
 

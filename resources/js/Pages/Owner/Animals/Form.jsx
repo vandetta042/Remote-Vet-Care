@@ -2,7 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import PortalLayout from '@/Layouts/PortalLayout';
+import OwnerLayout from '@/Layouts/OwnerLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Form({
@@ -44,28 +44,24 @@ export default function Form({
     };
 
     return (
-        <PortalLayout
+        <OwnerLayout
             title={isEdit ? 'Edit Animal' : 'Add Animal'}
-            header={
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
-                            Animal Profile
-                        </p>
-                        <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            {isEdit ? 'Update animal details' : 'Create a new animal profile'}
-                        </h2>
-                    </div>
-                    <Link
-                        href={route('owner.animals.index')}
-                        className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
-                    >
-                        Back to Animals
-                    </Link>
-                </div>
+            subtitle={
+                isEdit
+                    ? 'Update the animal profile so future care requests stay accurate.'
+                    : 'Create a simple profile for the animal you want to monitor.'
             }
         >
             <Head title={isEdit ? 'Edit Animal' : 'Add Animal'} />
+
+            <div className="mb-6 flex justify-end">
+                <Link
+                    href={route('owner.animals.index')}
+                    className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
+                >
+                    Back to My Animals
+                </Link>
+            </div>
 
             <form
                 onSubmit={submit}
@@ -257,6 +253,6 @@ export default function Form({
                     </PrimaryButton>
                 </div>
             </form>
-        </PortalLayout>
+        </OwnerLayout>
     );
 }
