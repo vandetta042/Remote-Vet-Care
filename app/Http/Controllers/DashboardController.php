@@ -182,16 +182,142 @@ class DashboardController extends Controller
                 ['label' => 'Published Rules', 'value' => PublishedRuleSet::count(), 'tone' => 'success'],
             ],
             quickLinks: [
-                ['label' => 'Manage Users', 'href' => route('admin.dashboard'), 'description' => 'Role management builds on the Phase 1 schema.'],
-                ['label' => 'System Reports', 'href' => route('admin.dashboard'), 'description' => 'Operational reports are planned after the core workflows.'],
-                ['label' => 'Knowledge Oversight', 'href' => route('admin.dashboard'), 'description' => 'Admins can monitor the review and publication pipeline.'],
+                ['label' => 'Manage Users', 'href' => route('admin.users.index'), 'description' => 'Review every user account, role, and contact record in one place.'],
+                ['label' => 'Care Requests', 'href' => route('admin.cases.index'), 'description' => 'Monitor the animal care queue, serious cases, and response progress.'],
+                ['label' => 'Knowledge Oversight', 'href' => route('admin.knowledge.index'), 'description' => 'Follow the research, review, and publication pipeline end to end.'],
+                ['label' => 'Dashboard Summary', 'href' => route('admin.dashboard'), 'description' => 'Return to the high-level operations overview anytime.'],
             ],
             spotlight: [
                 'This is the top-level operational view for the platform.',
                 'The counts are already live against the new database structure.',
-                'Later phases will attach management tables and reports to this area.',
+                'The admin navigation now opens real oversight screens instead of looping back to the dashboard.',
             ],
         );
+    }
+
+    public function adminUsers(): Response
+    {
+        $users = User::query()
+            ->withCount(['animals', 'ownedVeterinaryCases', 'knowledgeSubmissions'])
+            ->latest()
+            ->get()
+            ->map(fn (User $user): array => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status ?? 'active',
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'created_at' => $user->created_at?->format('M j, Y'),
+                'animals_count' => $user->animals_count,
+                'cases_count' => $user->owned_veterinary_cases_count,
+                'knowledge_submissions_count' => $user->knowledge_submissions_count,
+            ]);
+
+        return Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'stats' => [
+                ['label' => 'Total Users', 'value' => User::count()],
+                ['label' => 'Animal Owners', 'value' => User::where('role', User::ROLE_OWNER)->count()],
+                ['label' => 'Veterinarians', 'value' => User::where('role', User::ROLE_VET)->count()],
+                ['label' => 'Researchers', 'value' => User::where('role', User::ROLE_RESEARCHER)->count()],
+                ['label' => 'Reviewers', 'value' => User::where('role', User::ROLE_REVIEWER)->count()],
+                ['label' => 'Curators', 'value' => User::where('role', User::ROLE_CURATOR)->count()],
+            ],
+        ]);
+    }
+
+    public function adminCases(): Response
+    {
+        $cases = VeterinaryCase::query()
+            ->with(['owner', 'animal.species', 'assignedVet', 'symptoms'])
+            ->withCount('attachments')
+            ->latest()
+            ->get()
+            ->map(fn (VeterinaryCase $case): array => [
+                'id' => $case->id,
+                'title' => $case->title,
+                'description' => $case->description,
+                'status' => $case->status,
+                'urgency_level' => $case->urgency_level,
+                'system_suggestion' => $case->system_suggestion,
+                'system_score' => $case->system_score,
+                'owner' => [
+                    'name' => $case->owner?->name,
+                    'email' => $case->owner?->email,
+                ],
+                'animal' => [
+                    'name' => $case->animal?->name,
+                    'species' => $case->animal?->species?->name,
+                ],
+                'assigned_vet' => $case->assignedVet?->name,
+                'signs' => $case->symptoms->pluck('name')->take(4)->values()->all(),
+                'attachments_count' => $case->attachments_count,
+                'follow_up_date' => $case->follow_up_date?->format('M j, Y'),
+            ]);
+
+        return Inertia::render('Admin/Cases/Index', [
+            'cases' => $cases,
+            'stats' => [
+                ['label' => 'Total Care Requests', 'value' => VeterinaryCase::count()],
+                ['label' => 'New Requests', 'value' => VeterinaryCase::where('status', 'submitted')->count()],
+                ['label' => 'Waiting for Vet', 'value' => VeterinaryCase::where('status', 'under_review')->count()],
+                ['label' => 'Emergency Cases', 'value' => VeterinaryCase::where('urgency_level', 'emergency')->count()],
+                ['label' => 'Resolved', 'value' => VeterinaryCase::whereIn('status', ['resolved', 'closed'])->count()],
+            ],
+        ]);
+    }
+
+    public function adminKnowledge(): Response
+    {
+        $submissions = KnowledgeSubmission::query()
+            ->with(['submitter', 'reviewer', 'curator', 'species'])
+            ->withCount('reviews')
+            ->latest()
+            ->get()
+            ->map(fn (KnowledgeSubmission $submission): array => [
+                'id' => $submission->id,
+                'title' => $submission->title,
+                'disease_name' => $submission->disease_name,
+                'summary' => $submission->summary,
+                'source_type' => $submission->source_type,
+                'evidence_level' => $submission->evidence_level,
+                'status' => $submission->status,
+                'submitted_at' => $submission->submitted_at?->format('M j, Y'),
+                'reviewed_at' => $submission->reviewed_at?->format('M j, Y'),
+                'published_at' => $submission->published_at?->format('M j, Y'),
+                'reviews_count' => $submission->reviews_count,
+                'submitter' => $submission->submitter?->name,
+                'reviewer' => $submission->reviewer?->name,
+                'curator' => $submission->curator?->name,
+                'species' => $submission->species?->name,
+            ]);
+
+        $publishedRuleSets = PublishedRuleSet::query()
+            ->with(['disease', 'species', 'publisher'])
+            ->latest('published_at')
+            ->get()
+            ->map(fn (PublishedRuleSet $ruleSet): array => [
+                'id' => $ruleSet->id,
+                'version_number' => $ruleSet->version_number,
+                'is_active' => $ruleSet->is_active,
+                'published_at' => $ruleSet->published_at?->format('M j, Y'),
+                'disease' => $ruleSet->disease?->name,
+                'species' => $ruleSet->species?->name,
+                'publisher' => $ruleSet->publisher?->name,
+            ]);
+
+        return Inertia::render('Admin/Knowledge/Index', [
+            'submissions' => $submissions,
+            'publishedRuleSets' => $publishedRuleSets,
+            'stats' => [
+                ['label' => 'Pending Review', 'value' => KnowledgeSubmission::whereIn('status', ['submitted', 'under_review', 'correction_requested'])->count()],
+                ['label' => 'Approved', 'value' => KnowledgeSubmission::where('status', 'approved')->count()],
+                ['label' => 'Published Rules', 'value' => PublishedRuleSet::count()],
+                ['label' => 'Active Rules', 'value' => PublishedRuleSet::where('is_active', true)->count()],
+            ],
+        ]);
     }
 
     /**

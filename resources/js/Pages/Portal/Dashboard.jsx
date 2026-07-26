@@ -373,11 +373,12 @@ export default function Dashboard({
                                 Oversight
                             </p>
                             <h3 className="text-2xl font-semibold text-stone-900">
-                                Keep the center running smoothly
+                                Open the admin screens you need
                             </h3>
                             <p className="max-w-3xl text-sm leading-6 text-stone-600">
-                                Watch users, care requests, and knowledge flow
-                                from a single operations view.
+                                Use these shortcuts to move between users, care
+                                requests, and the knowledge pipeline without
+                                returning to the dashboard.
                             </p>
                         </div>
 
@@ -422,8 +423,8 @@ export default function Dashboard({
                         </p>
                     </div>
                     <div className="rounded-2xl bg-stone-900 px-5 py-4 text-sm text-stone-100">
-                        This portal stays available for the more technical
-                        roles in the system.
+                        Admin users now have dedicated screens for users, care
+                        requests, and knowledge oversight.
                     </div>
                 </div>
             }

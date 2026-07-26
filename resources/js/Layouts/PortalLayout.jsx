@@ -55,9 +55,9 @@ const roleConfig = {
         dashboardRoute: 'admin.dashboard',
         links: [
             { label: 'Dashboard', routeName: 'admin.dashboard', matches: ['admin.dashboard'] },
-            { label: 'Users', routeName: 'admin.dashboard', matches: [] },
-            { label: 'Cases', routeName: 'admin.dashboard', matches: [] },
-            { label: 'Knowledge', routeName: 'admin.dashboard', matches: [] },
+            { label: 'Users', routeName: 'admin.users.index', matches: ['admin.users.*'] },
+            { label: 'Cases', routeName: 'admin.cases.index', matches: ['admin.cases.*'] },
+            { label: 'Knowledge', routeName: 'admin.knowledge.index', matches: ['admin.knowledge.*'] },
         ],
     },
 };

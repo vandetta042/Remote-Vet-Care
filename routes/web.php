@@ -88,6 +88,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/', fn () => redirect()->route('admin.dashboard'))->name('home');
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        Route::get('/users', [DashboardController::class, 'adminUsers'])->name('users.index');
+        Route::get('/cases', [DashboardController::class, 'adminCases'])->name('cases.index');
+        Route::get('/knowledge', [DashboardController::class, 'adminKnowledge'])->name('knowledge.index');
     });
 });
 
