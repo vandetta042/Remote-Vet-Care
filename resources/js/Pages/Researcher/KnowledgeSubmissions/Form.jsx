@@ -2,7 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import PortalLayout from '@/Layouts/PortalLayout';
+import ResearchLayout from '@/Layouts/ResearchLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 function blankSymptom() {
@@ -49,7 +49,10 @@ export default function Form({
         source_type: submission?.source_type ?? '',
         source_reference: submission?.source_reference ?? '',
         evidence_level: submission?.evidence_level ?? '',
-        status: submission?.status && submission.status !== 'submitted' ? submission.status : 'draft',
+        status:
+            submission?.status && submission.status !== 'submitted'
+                ? submission.status
+                : 'draft',
         metadata: {
             affected_species_note: submission?.metadata?.affected_species_note ?? '',
             severity_note: submission?.metadata?.severity_note ?? '',
@@ -96,7 +99,13 @@ export default function Form({
 
     const removeArrayItem = (key, index) => {
         if (data[key].length === 1) {
-            setData(key, [key === 'symptoms' ? blankSymptom() : key === 'risk_factors' ? blankRiskFactor() : blankSource()]);
+            setData(key, [
+                key === 'symptoms'
+                    ? blankSymptom()
+                    : key === 'risk_factors'
+                      ? blankRiskFactor()
+                      : blankSource(),
+            ]);
             return;
         }
 
@@ -118,8 +127,8 @@ export default function Form({
     };
 
     return (
-        <PortalLayout
-            title={isEdit ? 'Edit Knowledge Submission' : 'Create Knowledge Submission'}
+        <ResearchLayout
+            title={isEdit ? 'Edit Knowledge Draft' : 'Create Knowledge Draft'}
             header={
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -127,26 +136,28 @@ export default function Form({
                             Researcher Workflow
                         </p>
                         <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            {isEdit ? 'Update structured veterinary knowledge' : 'Create a structured veterinary knowledge draft'}
+                            {isEdit
+                                ? 'Update knowledge draft'
+                                : 'Create a knowledge draft'}
                         </h2>
                     </div>
                     <Link
                         href={route('researcher.knowledge-submissions.index')}
                         className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
                     >
-                        Back to Submissions
+                        Back to Drafts
                     </Link>
                 </div>
             }
         >
-            <Head title={isEdit ? 'Edit Knowledge Submission' : 'Create Knowledge Submission'} />
+            <Head title={isEdit ? 'Edit Knowledge Draft' : 'Create Knowledge Draft'} />
 
             <form
                 onSubmit={submit}
                 className="space-y-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm"
             >
                 <div className="grid gap-6 md:grid-cols-2">
-                    <Field label="Submission Title" error={errors.title}>
+                    <Field label="Draft Title" error={errors.title}>
                         <TextInput
                             className="mt-1 block w-full"
                             value={data.title}
@@ -192,7 +203,7 @@ export default function Form({
                         </select>
                     </Field>
 
-                    <Field label="Primary Source Type" error={errors.source_type}>
+                    <Field label="Source Type" error={errors.source_type}>
                         <select
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             value={data.source_type}
@@ -289,8 +300,8 @@ export default function Form({
                 </div>
 
                 <DynamicSection
-                    title="Symptoms"
-                    description="Add weighted symptoms that support this knowledge record."
+                    title="Signs"
+                    description="Add weighted signs that support this knowledge draft."
                     onAdd={() => addArrayItem('symptoms', blankSymptom)}
                 >
                     {data.symptoms.map((symptom, index) => (
@@ -299,7 +310,7 @@ export default function Form({
                             className="grid gap-4 rounded-2xl border border-stone-200 bg-white p-4 md:grid-cols-2"
                         >
                             <Field
-                                label="Symptom Name"
+                                label="Sign Name"
                                 error={errors[`symptoms.${index}.symptom_name`]}
                             >
                                 <TextInput
@@ -359,7 +370,7 @@ export default function Form({
                             </Field>
                             <div className="md:col-span-2">
                                 <Field
-                                    label="Symptom Description"
+                                    label="Sign Description"
                                     error={errors[`symptoms.${index}.symptom_description`]}
                                 >
                                     <textarea
@@ -382,7 +393,7 @@ export default function Form({
                                     className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                                     onClick={() => removeArrayItem('symptoms', index)}
                                 >
-                                    Remove symptom
+                                    Remove sign
                                 </button>
                             </div>
                         </div>
@@ -391,7 +402,7 @@ export default function Form({
 
                 <DynamicSection
                     title="Risk Factors"
-                    description="Add environmental or exposure risks tied to this knowledge record."
+                    description="Add environmental or exposure risks tied to this knowledge draft."
                     onAdd={() => addArrayItem('risk_factors', blankRiskFactor)}
                 >
                     {data.risk_factors.map((riskFactor, index) => (
@@ -438,9 +449,7 @@ export default function Form({
                                 <button
                                     type="button"
                                     className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                                    onClick={() =>
-                                        removeArrayItem('risk_factors', index)
-                                    }
+                                    onClick={() => removeArrayItem('risk_factors', index)}
                                 >
                                     Remove risk factor
                                 </button>
@@ -451,7 +460,7 @@ export default function Form({
 
                 <DynamicSection
                     title="Evidence Sources"
-                    description="Track the evidence behind the submission. At least one source is required before submission for review."
+                    description="Track the evidence behind the draft. At least one source is required before submission for review."
                     onAdd={() => addArrayItem('sources', blankSource)}
                 >
                     {data.sources.map((source, index) => (
@@ -591,7 +600,7 @@ export default function Form({
                     </PrimaryButton>
                 </div>
             </form>
-        </PortalLayout>
+        </ResearchLayout>
     );
 }
 

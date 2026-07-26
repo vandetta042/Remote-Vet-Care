@@ -1,12 +1,12 @@
 import EmptyState from '@/Components/EmptyState';
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import ResearchLayout from '@/Layouts/ResearchLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Index({ submissions }) {
     return (
-        <PortalLayout
-            title="My Knowledge Submissions"
+        <ResearchLayout
+            title="My Knowledge Drafts"
             header={
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -14,28 +14,30 @@ export default function Index({ submissions }) {
                             Researcher Workflow
                         </p>
                         <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                            My Knowledge Submissions
+                            My Knowledge Drafts
                         </h2>
                         <p className="mt-2 text-sm leading-6 text-stone-600">
-                            Build structured disease knowledge with symptoms, risk factors, and evidence sources before sending it for veterinary review.
+                            Build structured disease knowledge with signs, risk
+                            factors, and evidence sources before sending it for
+                            veterinary review.
                         </p>
                     </div>
                     <Link
                         href={route('researcher.knowledge-submissions.create')}
                         className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
                     >
-                        New Submission
+                        New Draft
                     </Link>
                 </div>
             }
         >
-            <Head title="My Knowledge Submissions" />
+            <Head title="My Knowledge Drafts" />
 
             {submissions.length === 0 ? (
                 <EmptyState
-                    title="No submissions yet"
-                    description="Create your first structured knowledge submission to begin feeding the veterinary rule base."
-                    actionLabel="Create Submission"
+                    title="No drafts yet"
+                    description="Create your first structured knowledge draft to begin feeding the veterinary rule base."
+                    actionLabel="Create Draft"
                     actionHref={route('researcher.knowledge-submissions.create')}
                 />
             ) : (
@@ -55,9 +57,10 @@ export default function Index({ submissions }) {
                                         {submission.title}
                                     </h3>
                                     <p className="mt-2 text-sm text-stone-600">
-                                        {submission.disease_name || 'General knowledge submission'}
+                                        {submission.disease_name ||
+                                            'General knowledge submission'}
                                         {submission.reviewer?.name
-                                            ? ` • Reviewer: ${submission.reviewer.name}`
+                                            ? ` - Reviewer: ${submission.reviewer.name}`
                                             : ''}
                                     </p>
                                 </div>
@@ -69,6 +72,6 @@ export default function Index({ submissions }) {
                     ))}
                 </div>
             )}
-        </PortalLayout>
+        </ResearchLayout>
     );
 }

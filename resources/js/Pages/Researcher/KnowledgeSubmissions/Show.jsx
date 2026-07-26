@@ -1,5 +1,5 @@
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import ResearchLayout from '@/Layouts/ResearchLayout';
 import { Head, Link, router } from '@inertiajs/react';
 
 export default function Show({ submission, canEdit, canSubmit }) {
@@ -10,7 +10,7 @@ export default function Show({ submission, canEdit, canSubmit }) {
     };
 
     return (
-        <PortalLayout
+        <ResearchLayout
             title={submission.title}
             header={
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -231,7 +231,7 @@ export default function Show({ submission, canEdit, canSubmit }) {
                     </Panel>
                 </section>
             </div>
-        </PortalLayout>
+        </ResearchLayout>
     );
 }
 

@@ -1,4 +1,4 @@
-import PortalLayout from '@/Layouts/PortalLayout';
+import CuratorLayout from '@/Layouts/CuratorLayout';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function Show({ submission, defaults }) {
@@ -12,7 +12,7 @@ export default function Show({ submission, defaults }) {
     };
 
     return (
-        <PortalLayout
+        <CuratorLayout
             title="Publish Rule Set"
             header={
                 <div>
@@ -23,7 +23,8 @@ export default function Show({ submission, defaults }) {
                         Publish Rule Set
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                        Structure this approved submission into disease and rule records that the diagnosis engine can use immediately.
+                        Structure this approved submission into disease and rule
+                        records that the diagnosis engine can use immediately.
                     </p>
                 </div>
             }
@@ -47,7 +48,9 @@ export default function Show({ submission, defaults }) {
                                     </p>
                                     <p className="mt-1 text-sm text-stone-600">
                                         Weight {item.symptom_weight}
-                                        {item.severity_level ? ` • ${item.severity_level}` : ''}
+                                        {item.severity_level
+                                            ? ` - ${item.severity_level}`
+                                            : ''}
                                     </p>
                                 </div>
                             ))}
@@ -109,25 +112,37 @@ export default function Show({ submission, defaults }) {
                                     ))}
                                 </select>
                             </Field>
-                            <Field label="Transmission Mode" error={errors.transmission_mode}>
+                            <Field
+                                label="Transmission Mode"
+                                error={errors.transmission_mode}
+                            >
                                 <input
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     value={data.transmission_mode}
-                                    onChange={(e) => setData('transmission_mode', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('transmission_mode', e.target.value)
+                                    }
                                 />
                             </Field>
-                            <Field label="General Care Advice" error={errors.general_care_advice}>
+                            <Field
+                                label="General Care Advice"
+                                error={errors.general_care_advice}
+                            >
                                 <textarea
                                     className="mt-1 block min-h-28 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     value={data.general_care_advice}
-                                    onChange={(e) => setData('general_care_advice', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('general_care_advice', e.target.value)
+                                    }
                                 />
                             </Field>
                             <Field label="Version Number" error={errors.version_number}>
                                 <input
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     value={data.version_number}
-                                    onChange={(e) => setData('version_number', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('version_number', e.target.value)
+                                    }
                                 />
                             </Field>
                             <div className="grid gap-4 md:grid-cols-2">
@@ -136,7 +151,12 @@ export default function Show({ submission, defaults }) {
                                         type="checkbox"
                                         className="mr-3"
                                         checked={data.requires_vet_attention}
-                                        onChange={(e) => setData('requires_vet_attention', e.target.checked)}
+                                        onChange={(e) =>
+                                            setData(
+                                                'requires_vet_attention',
+                                                e.target.checked,
+                                            )
+                                        }
                                     />
                                     Requires vet attention
                                 </label>
@@ -145,7 +165,9 @@ export default function Show({ submission, defaults }) {
                                         type="checkbox"
                                         className="mr-3"
                                         checked={data.requires_lab_test}
-                                        onChange={(e) => setData('requires_lab_test', e.target.checked)}
+                                        onChange={(e) =>
+                                            setData('requires_lab_test', e.target.checked)
+                                        }
                                     />
                                     Requires lab test
                                 </label>
@@ -162,7 +184,7 @@ export default function Show({ submission, defaults }) {
                     </form>
                 </section>
             </div>
-        </PortalLayout>
+        </CuratorLayout>
     );
 }
 

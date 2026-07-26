@@ -1,5 +1,5 @@
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import ReviewerLayout from '@/Layouts/ReviewerLayout';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function Show({ submission, decisionOptions }) {
@@ -14,7 +14,7 @@ export default function Show({ submission, decisionOptions }) {
     };
 
     return (
-        <PortalLayout
+        <ReviewerLayout
             title={submission.title}
             header={
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -26,7 +26,8 @@ export default function Show({ submission, decisionOptions }) {
                             Review Submission
                         </h2>
                         <p className="mt-2 text-sm text-stone-600">
-                            {submission.disease_name || 'General knowledge'} {submission.species ? `• ${submission.species.name}` : ''}
+                            {submission.disease_name || 'General knowledge'}
+                            {submission.species ? ` - ${submission.species.name}` : ''}
                         </p>
                     </div>
                     <StatusBadge value={submission.status} />
@@ -42,14 +43,26 @@ export default function Show({ submission, decisionOptions }) {
                             {submission.summary}
                         </p>
                         <div className="mt-4 grid gap-3 md:grid-cols-2">
-                            <Info label="Researcher" value={submission.submitter?.name ?? 'Unknown'} />
-                            <Info label="Evidence Level" value={submission.evidence_level ?? 'Not set'} />
-                            <Info label="Primary Source Type" value={submission.source_type ?? 'Not set'} />
-                            <Info label="Source Reference" value={submission.source_reference ?? 'Not set'} />
+                            <Info
+                                label="Researcher"
+                                value={submission.submitter?.name ?? 'Unknown'}
+                            />
+                            <Info
+                                label="Evidence Level"
+                                value={submission.evidence_level ?? 'Not set'}
+                            />
+                            <Info
+                                label="Primary Source Type"
+                                value={submission.source_type ?? 'Not set'}
+                            />
+                            <Info
+                                label="Source Reference"
+                                value={submission.source_reference ?? 'Not set'}
+                            />
                         </div>
                     </Panel>
 
-                    <Panel title="Symptoms and Risk Factors">
+                    <Panel title="Signs and Risk Factors">
                         <div className="space-y-4">
                             {submission.symptoms.map((item) => (
                                 <div
@@ -70,7 +83,8 @@ export default function Show({ submission, decisionOptions }) {
                                         </div>
                                     </div>
                                     <p className="mt-2 text-sm leading-6 text-stone-700">
-                                        {item.symptom_description || 'No description provided.'}
+                                        {item.symptom_description ||
+                                            'No description provided.'}
                                     </p>
                                 </div>
                             ))}
@@ -107,8 +121,8 @@ export default function Show({ submission, decisionOptions }) {
                                     </h4>
                                     <p className="mt-2 text-sm text-stone-600">
                                         {item.source_author || 'Unknown author'}
-                                        {item.source_year ? ` • ${item.source_year}` : ''}
-                                        {item.source_type ? ` • ${item.source_type}` : ''}
+                                        {item.source_year ? ` - ${item.source_year}` : ''}
+                                        {item.source_type ? ` - ${item.source_type}` : ''}
                                     </p>
                                     <p className="mt-2 text-sm leading-6 text-stone-700">
                                         {item.notes || 'No notes provided.'}
@@ -139,7 +153,9 @@ export default function Show({ submission, decisionOptions }) {
                                     ))}
                                 </select>
                                 {errors.decision ? (
-                                    <p className="mt-2 text-sm text-red-600">{errors.decision}</p>
+                                    <p className="mt-2 text-sm text-red-600">
+                                        {errors.decision}
+                                    </p>
                                 ) : null}
                             </div>
 
@@ -153,7 +169,9 @@ export default function Show({ submission, decisionOptions }) {
                                     onChange={(e) => setData('comments', e.target.value)}
                                 />
                                 {errors.comments ? (
-                                    <p className="mt-2 text-sm text-red-600">{errors.comments}</p>
+                                    <p className="mt-2 text-sm text-red-600">
+                                        {errors.comments}
+                                    </p>
                                 ) : null}
                             </div>
 
@@ -200,7 +218,7 @@ export default function Show({ submission, decisionOptions }) {
                     </Panel>
                 </section>
             </div>
-        </PortalLayout>
+        </ReviewerLayout>
     );
 }
 

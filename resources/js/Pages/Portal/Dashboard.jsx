@@ -1,4 +1,8 @@
+import AdminLayout from '@/Layouts/AdminLayout';
+import CuratorLayout from '@/Layouts/CuratorLayout';
 import PortalLayout from '@/Layouts/PortalLayout';
+import ResearchLayout from '@/Layouts/ResearchLayout';
+import ReviewerLayout from '@/Layouts/ReviewerLayout';
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import VetLayout from '@/Layouts/VetLayout';
 import { Head, Link } from '@inertiajs/react';
@@ -212,6 +216,192 @@ export default function Dashboard({
                     </section>
                 </div>
             </VetLayout>
+        );
+    }
+
+    if (roleLabel === 'Researcher') {
+        return (
+            <ResearchLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Drafting
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Keep evidence moving forward
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Start a draft when you have a clear disease idea,
+                                then fill it with signs, risk factors, and
+                                supporting sources.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </ResearchLayout>
+        );
+    }
+
+    if (roleLabel === 'Veterinary Reviewer') {
+        return (
+            <ReviewerLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Review Queue
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Decide what should move forward
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Open the pending review list, inspect the
+                                evidence, and record a clear decision with
+                                comments.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </ReviewerLayout>
+        );
+    }
+
+    if (roleLabel === 'Data Curator') {
+        return (
+            <CuratorLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Publication Workbench
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Turn approved knowledge into rule sets
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Move from approved submission to a structured
+                                disease record and keep the live rule set current.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </CuratorLayout>
+        );
+    }
+
+    if (roleLabel === 'Administrator') {
+        return (
+            <AdminLayout title={title} subtitle={description}>
+                <Head title={title} />
+
+                <div className="space-y-6">
+                    {sharedStats}
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Oversight
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Keep the center running smoothly
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Watch users, care requests, and knowledge flow
+                                from a single operations view.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                            {quickLinks.map((item) => (
+                                <ActionCard key={item.label} item={item} />
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="grid gap-4 xl:grid-cols-3">
+                        {spotlight.map((item) => (
+                            <div
+                                key={item}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <p className="text-sm leading-6 text-stone-700">
+                                    {item}
+                                </p>
+                            </div>
+                        ))}
+                    </section>
+                </div>
+            </AdminLayout>
         );
     }
 

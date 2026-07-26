@@ -1,11 +1,11 @@
 import EmptyState from '@/Components/EmptyState';
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import ReviewerLayout from '@/Layouts/ReviewerLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Index({ submissions }) {
     return (
-        <PortalLayout
+        <ReviewerLayout
             title="Pending Knowledge Reviews"
             header={
                 <div>
@@ -56,6 +56,6 @@ export default function Index({ submissions }) {
                     ))}
                 </div>
             )}
-        </PortalLayout>
+        </ReviewerLayout>
     );
 }

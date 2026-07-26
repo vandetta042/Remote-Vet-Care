@@ -1,11 +1,11 @@
 import EmptyState from '@/Components/EmptyState';
 import StatusBadge from '@/Components/StatusBadge';
-import PortalLayout from '@/Layouts/PortalLayout';
+import CuratorLayout from '@/Layouts/CuratorLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Index({ approvedSubmissions, publishedRuleSets }) {
     return (
-        <PortalLayout
+        <CuratorLayout
             title="Approved Knowledge Queue"
             header={
                 <div>
@@ -16,7 +16,8 @@ export default function Index({ approvedSubmissions, publishedRuleSets }) {
                         Approved Knowledge Queue
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-stone-600">
-                        Convert approved submissions into structured disease, symptom, risk factor, and published rule records.
+                        Convert approved submissions into structured disease,
+                        symptom, risk factor, and published rule records.
                     </p>
                 </div>
             }
@@ -48,7 +49,7 @@ export default function Index({ approvedSubmissions, publishedRuleSets }) {
                                                     {submission.title}
                                                 </h4>
                                                 <p className="mt-1 text-sm text-stone-600">
-                                                    {submission.species?.name ?? 'Species not set'} • {submission.submitter?.name ?? 'Researcher'}
+                                                    {submission.species?.name ?? 'Species not set'} - {submission.submitter?.name ?? 'Researcher'}
                                                 </p>
                                             </div>
                                             <StatusBadge value={submission.status} />
@@ -82,7 +83,7 @@ export default function Index({ approvedSubmissions, publishedRuleSets }) {
                                                     {ruleSet.disease?.name}
                                                 </h4>
                                                 <p className="mt-1 text-sm text-stone-600">
-                                                    {ruleSet.species?.name ?? 'Species'} • version {ruleSet.version_number}
+                                                    {ruleSet.species?.name ?? 'Species'} - version {ruleSet.version_number}
                                                 </p>
                                             </div>
                                             {ruleSet.is_active ? (
@@ -98,6 +99,6 @@ export default function Index({ approvedSubmissions, publishedRuleSets }) {
                     </div>
                 </section>
             </div>
-        </PortalLayout>
+        </CuratorLayout>
     );
 }
