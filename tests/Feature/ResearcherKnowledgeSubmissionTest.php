@@ -37,6 +37,8 @@ class ResearcherKnowledgeSubmissionTest extends TestCase
                     'affected_species_note' => 'Mostly domestic dogs.',
                     'severity_note' => 'Often moderate but may escalate.',
                     'care_advice' => 'Isolate and monitor hydration.',
+                    'care_recommendations' => "Isolate the animal.\nMonitor hydration closely.",
+                    'care_urgency_level' => 'high',
                 ],
                 'symptoms' => [
                     [
@@ -74,6 +76,11 @@ class ResearcherKnowledgeSubmissionTest extends TestCase
         $this->assertDatabaseCount('knowledge_submission_symptoms', 1);
         $this->assertDatabaseCount('knowledge_submission_risk_factors', 1);
         $this->assertDatabaseCount('knowledge_sources', 1);
+
+        $submission = KnowledgeSubmission::query()->latest()->firstOrFail();
+        $this->assertSame('Isolate and monitor hydration.', $submission->metadata['care_advice']);
+        $this->assertSame("Isolate the animal.\nMonitor hydration closely.", $submission->metadata['care_recommendations'] ?? null);
+        $this->assertSame('high', $submission->metadata['care_urgency_level'] ?? null);
     }
 
     public function test_researcher_can_submit_a_draft_for_review(): void

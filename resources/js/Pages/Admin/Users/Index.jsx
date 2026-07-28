@@ -66,6 +66,17 @@ function UserCard({ user }) {
                     Location: {user.address ?? 'Not set'}
                 </p>
             </div>
+
+            {user.email ? (
+                <div className="mt-5">
+                    <a
+                        href={`mailto:${user.email}`}
+                        className="inline-flex rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
+                    >
+                        Email user
+                    </a>
+                </div>
+            ) : null}
         </div>
     );
 }

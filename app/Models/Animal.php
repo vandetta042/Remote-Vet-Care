@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Animal extends Model
 {
@@ -24,6 +25,7 @@ class Animal extends Model
         'vaccination_status',
         'medical_history',
         'location',
+        'profile_photo_path',
     ];
 
     protected function casts(): array
@@ -32,6 +34,10 @@ class Animal extends Model
             'weight' => 'decimal:2',
         ];
     }
+
+    protected $appends = [
+        'profile_photo_url',
+    ];
 
     public function owner(): BelongsTo
     {
@@ -51,5 +57,12 @@ class Animal extends Model
     public function veterinaryCases(): HasMany
     {
         return $this->hasMany(VeterinaryCase::class);
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->profile_photo_path
+            ? Storage::disk('public')->url($this->profile_photo_path)
+            : null;
     }
 }

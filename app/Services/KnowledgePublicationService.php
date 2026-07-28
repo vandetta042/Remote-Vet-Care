@@ -27,6 +27,13 @@ class KnowledgePublicationService
     ): PublishedRuleSet {
         return DB::transaction(function () use ($submission, $curatorId, $payload) {
             $submission->loadMissing(['symptoms', 'riskFactors', 'species']);
+            $metadata = $submission->metadata ?? [];
+            $careRecommendations = $this->normalizeCareRecommendations(
+                $payload['care_recommendations'] ?? null,
+                $metadata['care_recommendations'] ?? $metadata['care_advice'] ?? null,
+            );
+            $generalCareAdvice = $payload['general_care_advice']
+                ?? (! empty($careRecommendations) ? implode("\n", $careRecommendations) : null);
 
             $disease = Disease::updateOrCreate(
                 [
@@ -37,7 +44,7 @@ class KnowledgePublicationService
                     'description' => $payload['description'] ?? null,
                     'severity_level' => $payload['severity_level'],
                     'transmission_mode' => $payload['transmission_mode'] ?? null,
-                    'general_care_advice' => $payload['general_care_advice'] ?? null,
+                    'general_care_advice' => $generalCareAdvice,
                     'requires_vet_attention' => (bool) $payload['requires_vet_attention'],
                     'requires_lab_test' => (bool) $payload['requires_lab_test'],
                 ],
@@ -86,6 +93,8 @@ class KnowledgePublicationService
                 'version_number' => $payload['version_number'],
                 'rules_json' => [
                     'submission_id' => $submission->id,
+                    'care_recommendations' => $careRecommendations,
+                    'care_urgency_level' => $payload['care_urgency_level'] ?? null,
                     'symptoms' => array_values(array_map(
                         fn ($symptomId, $rule) => [
                             'symptom_id' => $symptomId,
@@ -129,5 +138,32 @@ class KnowledgePublicationService
 
             return $publishedRuleSet;
         });
+    }
+
+    /**
+     * @param  array<int, string>|string|null  $value
+     * @return array<int, string>
+     */
+    protected function normalizeCareRecommendations(array|string|null $value, array|string|null $fallback = null): array
+    {
+        $candidate = $value ?? $fallback;
+
+        if (is_array($candidate)) {
+            return array_values(array_filter(array_map(
+                static fn ($item) => trim((string) $item),
+                $candidate,
+            ), static fn (string $item) => $item !== ''));
+        }
+
+        if (! is_string($candidate) || trim($candidate) === '') {
+            return [];
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $candidate) ?: [];
+
+        return array_values(array_filter(array_map(
+            static fn (string $line) => trim(ltrim($line, "-* \t")),
+            $lines,
+        ), static fn (string $item) => $item !== ''));
     }
 }

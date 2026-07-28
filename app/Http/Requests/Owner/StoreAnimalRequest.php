@@ -26,6 +26,7 @@ class StoreAnimalRequest extends FormRequest
             'vaccination_status' => ['nullable', Rule::in(['up_to_date', 'partial', 'not_vaccinated', 'unknown'])],
             'medical_history' => ['nullable', 'string'],
             'location' => ['nullable', 'string', 'max:255'],
+            'profile_photo' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }

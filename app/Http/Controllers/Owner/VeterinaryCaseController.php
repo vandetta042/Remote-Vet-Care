@@ -84,7 +84,7 @@ class VeterinaryCaseController extends Controller
             'location' => $validated['location'] ?? $animal->location,
             'status' => 'submitted',
             'urgency_level' => $diagnosis['urgency_level'],
-            'system_suggestion' => json_encode($diagnosis['top_matches'], JSON_THROW_ON_ERROR),
+            'system_suggestion' => json_encode($diagnosis, JSON_THROW_ON_ERROR),
             'system_score' => $diagnosis['primary_score'],
             'system_explanation' => $diagnosis['system_explanation'],
         ]);
@@ -133,7 +133,8 @@ class VeterinaryCaseController extends Controller
             'assignedVet:id,name,email',
         ]);
 
-        $systemMatches = $this->decodeSystemMatches($veterinaryCase->system_suggestion);
+        $diagnosis = $this->decodeDiagnosisPayload($veterinaryCase->system_suggestion);
+        $systemMatches = $diagnosis['top_matches'] ?? $this->decodeSystemMatches($veterinaryCase->system_suggestion);
 
         return Inertia::render('Owner/Cases/Show', [
             'veterinaryCase' => [
@@ -147,6 +148,7 @@ class VeterinaryCaseController extends Controller
                     'url' => Storage::disk('public')->url($attachment->file_path),
                 ]),
             ],
+            'diagnosis' => $diagnosis,
             'disclaimer' => 'This is a system-generated suggestion and should not replace a veterinarian\'s professional diagnosis.',
         ]);
     }
@@ -156,13 +158,45 @@ class VeterinaryCaseController extends Controller
      */
     protected function decodeSystemMatches(?string $storedSuggestion): array
     {
+        $decoded = $this->decodeDiagnosisPayload($storedSuggestion);
+
+        if (isset($decoded['top_matches']) && is_array($decoded['top_matches'])) {
+            return $decoded['top_matches'];
+        }
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function decodeDiagnosisPayload(?string $storedSuggestion): array
+    {
         if (! $storedSuggestion) {
             return [];
         }
 
         $decoded = json_decode($storedSuggestion, true);
 
-        return is_array($decoded) ? $decoded : [];
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        if (array_key_exists('top_matches', $decoded) || array_key_exists('possible_conditions', $decoded)) {
+            return $decoded;
+        }
+
+        return [
+            'top_matches' => $decoded,
+            'possible_conditions' => $decoded,
+            'care_recommendations' => [],
+            'warnings' => [],
+            'urgency_level' => 'low',
+            'urgency_label' => 'LOW',
+            'primary_score' => null,
+            'system_suggestion' => '',
+            'system_explanation' => '',
+        ];
     }
 
     /**

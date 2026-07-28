@@ -2,6 +2,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import AnimalIllustration from '@/Components/AnimalIllustration';
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
@@ -27,6 +28,7 @@ export default function Form({
         vaccination_status: animal?.vaccination_status ?? '',
         medical_history: animal?.medical_history ?? '',
         location: animal?.location ?? '',
+        profile_photo: null,
     });
 
     const filteredBreeds = breeds.filter(
@@ -67,6 +69,71 @@ export default function Form({
                 onSubmit={submit}
                 className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm"
             >
+                <div className="mb-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+                    <div className="rounded-[2rem] border border-stone-200 bg-gradient-to-br from-amber-50 via-white to-stone-50 p-5">
+                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                            Animal Photo
+                        </p>
+                        <h3 className="mt-2 text-xl font-semibold text-stone-900">
+                            Add a photo if you have one
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-stone-600">
+                            A clear photo helps the vet understand your animal faster when a care
+                            request comes in.
+                        </p>
+                        <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white">
+                            {animal?.profile_photo_url ? (
+                                <img
+                                    src={animal.profile_photo_url}
+                                    alt={animal.name}
+                                    className="h-60 w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-60 items-center justify-center px-6 text-center">
+                                    <div>
+                                        <p className="text-sm font-semibold text-stone-900">
+                                            No photo yet
+                                        </p>
+                                        <p className="mt-2 text-sm leading-6 text-stone-600">
+                                            You can upload a clear image of the animal here.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-4">
+                            <AnimalIllustration
+                                species="Pets and Livestock"
+                                title="Healthy animals start here"
+                                subtitle="A friendly profile for each animal helps the care request feel simpler and more personal."
+                                imageSrc="/images/remote-vet/pets-closeup.png"
+                            />
+                        </div>
+                        <div className="mt-4">
+                            <InputLabel htmlFor="profile_photo" value="Upload Photo" />
+                            <input
+                                id="profile_photo"
+                                type="file"
+                                accept="image/*"
+                                className="mt-1 block w-full text-sm text-stone-600"
+                                onChange={(e) => setData('profile_photo', e.target.files?.[0] ?? null)}
+                            />
+                            <InputError className="mt-2" message={errors.profile_photo} />
+                        </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-stone-200 bg-stone-50 p-5">
+                        <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                            Quick Tips
+                        </p>
+                        <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-700">
+                            <li>Use a clear, well-lit photo if possible.</li>
+                            <li>Crop out anything that makes it hard to see the animal.</li>
+                            <li>You can replace the photo later if needed.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div className="grid gap-6 md:grid-cols-2">
                     <div>
                         <InputLabel htmlFor="name" value="Animal Name" />

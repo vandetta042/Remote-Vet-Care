@@ -136,6 +136,37 @@ export default function Show({ submission, defaults }) {
                                     }
                                 />
                             </Field>
+                            <Field
+                                label="Care Recommendations"
+                                error={errors.care_recommendations}
+                            >
+                                <textarea
+                                    className="mt-1 block min-h-28 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    value={data.care_recommendations}
+                                    onChange={(e) =>
+                                        setData('care_recommendations', e.target.value)
+                                    }
+                                    placeholder="Enter one recommendation per line."
+                                />
+                            </Field>
+                            <Field
+                                label="Care Urgency"
+                                error={errors.care_urgency_level}
+                            >
+                                <select
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    value={data.care_urgency_level}
+                                    onChange={(e) =>
+                                        setData('care_urgency_level', e.target.value)
+                                    }
+                                >
+                                    {['low', 'moderate', 'high', 'emergency'].map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
                             <Field label="Version Number" error={errors.version_number}>
                                 <input
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"

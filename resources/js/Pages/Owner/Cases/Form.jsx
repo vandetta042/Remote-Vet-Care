@@ -1,4 +1,5 @@
 import Checkbox from '@/Components/Checkbox';
+import AnimalIllustration from '@/Components/AnimalIllustration';
 import EmptyState from '@/Components/EmptyState';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -65,6 +66,47 @@ export default function Form({ animals, symptoms, riskFactors }) {
             subtitle="Use these steps to send a simple care request for one of your animals."
         >
             <Head title="Report a Sick Animal" />
+
+            <div className="mb-6 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+                <section className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+                    <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                        Care Request
+                    </p>
+                    <h2 className="mt-3 text-3xl font-semibold text-stone-900">
+                        Tell us what your animal needs
+                    </h2>
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
+                        Follow the steps below to share the signs you noticed, attach a photo if
+                        it helps, and send the request to a veterinarian.
+                    </p>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {[
+                            'Choose the animal',
+                            'Select the signs',
+                            'Describe what happened',
+                            'Add a photo if needed',
+                            'Review and submit',
+                        ].map((item, index) => (
+                            <div
+                                key={item}
+                                className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700"
+                            >
+                                <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-stone-900 text-xs font-semibold text-white">
+                                    {index + 1}
+                                </span>
+                                {item}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* <AnimalIllustration
+                    species="Owner Care"
+                    title="Friendly help for a worried day"
+                    subtitle="The form is designed to guide you step by step so you never have to guess what to do next."
+                /> */}
+            </div>
 
             <form onSubmit={submit} className="space-y-6">
                 <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">

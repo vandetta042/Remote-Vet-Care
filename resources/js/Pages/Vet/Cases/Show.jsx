@@ -1,4 +1,5 @@
 import InputError from '@/Components/InputError';
+import AnimalIllustration from '@/Components/AnimalIllustration';
 import StatusBadge from '@/Components/StatusBadge';
 import VetLayout from '@/Layouts/VetLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -46,15 +47,31 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                     </div>
 
                     <Panel title="Animal Profile">
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <Info label="Owner" value={veterinaryCase.owner?.name ?? 'Unknown'} />
-                            <Info label="Owner Email" value={veterinaryCase.owner?.email ?? 'Not available'} />
-                            <Info label="Phone" value={veterinaryCase.owner?.phone ?? 'Not available'} />
-                            <Info label="Address" value={veterinaryCase.owner?.address ?? 'Not available'} />
-                            <Info label="Breed" value={veterinaryCase.animal?.breed?.name ?? 'Not specified'} />
-                            <Info label="Age" value={veterinaryCase.animal?.age ?? 'Not specified'} />
-                            <Info label="Gender" value={veterinaryCase.animal?.gender ?? 'Not specified'} />
-                            <Info label="Weight" value={veterinaryCase.animal?.weight ? `${veterinaryCase.animal.weight} kg` : 'Not specified'} />
+                        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+                            <div className="overflow-hidden rounded-[2rem] border border-stone-200 bg-gradient-to-br from-amber-50 via-white to-stone-50">
+                                {veterinaryCase.animal?.profile_photo_url ? (
+                                    <img
+                                        src={veterinaryCase.animal.profile_photo_url}
+                                        alt={veterinaryCase.animal?.name ?? 'Animal'}
+                                        className="h-72 w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-72 items-center justify-center px-6 text-center text-stone-600">
+                                        No animal photo uploaded yet.
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <Info label="Owner" value={veterinaryCase.owner?.name ?? 'Unknown'} />
+                                <Info label="Owner Email" value={veterinaryCase.owner?.email ?? 'Not available'} />
+                                <Info label="Phone" value={veterinaryCase.owner?.phone ?? 'Not available'} />
+                                <Info label="Address" value={veterinaryCase.owner?.address ?? 'Not available'} />
+                                <Info label="Breed" value={veterinaryCase.animal?.breed?.name ?? 'Not specified'} />
+                                <Info label="Age" value={veterinaryCase.animal?.age ?? 'Not specified'} />
+                                <Info label="Gender" value={veterinaryCase.animal?.gender ?? 'Not specified'} />
+                                <Info label="Weight" value={veterinaryCase.animal?.weight ? `${veterinaryCase.animal.weight} kg` : 'Not specified'} />
+                            </div>
                         </div>
                         <div className="mt-4 rounded-2xl bg-stone-50 p-4">
                             <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
@@ -104,7 +121,7 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                                         <div className="flex flex-wrap items-start justify-between gap-3">
                                             <div>
                                                 <h4 className="text-lg font-semibold text-stone-900">
-                                                    {match.disease_name}
+                                                    {match.disease_name ?? match.name ?? 'Possible condition'}
                                                 </h4>
                                                 <p className="mt-2 text-sm leading-6 text-stone-600">
                                                     {match.explanation}
@@ -112,7 +129,7 @@ export default function Show({ veterinaryCase, statusOptions, vetOptions }) {
                                             </div>
                                             <div className="text-end">
                                                 <p className="text-2xl font-semibold text-stone-900">
-                                                    {match.score}%
+                                                    {Math.round(match.score ?? match.confidence ?? 0)}%
                                                 </p>
                                                 <div className="mt-2">
                                                     <StatusBadge value={match.severity} />

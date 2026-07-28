@@ -149,6 +149,13 @@ class KnowledgeSubmissionController extends Controller
         array $payload,
         int $userId,
     ): KnowledgeSubmission {
+        $metadata = $payload['metadata'] ?? null;
+        if (is_array($metadata)) {
+            $metadata['care_recommendations'] = $metadata['care_recommendations']
+                ?? $metadata['care_advice']
+                ?? null;
+        }
+
         $submission->fill([
             'submitted_by' => $userId,
             'title' => $payload['title'],
@@ -158,7 +165,7 @@ class KnowledgeSubmissionController extends Controller
             'source_type' => $payload['source_type'] ?? null,
             'source_reference' => $payload['source_reference'] ?? null,
             'evidence_level' => $payload['evidence_level'] ?? null,
-            'metadata' => $payload['metadata'] ?? null,
+            'metadata' => $metadata,
             'status' => $payload['status'] ?? 'draft',
         ])->save();
 

@@ -47,6 +47,14 @@ function SubmissionCard({ submission }) {
                         <p>Reviews: {submission.reviews_count}</p>
                         <p>Submitted: {submission.submitted_at ?? 'Not set'}</p>
                     </div>
+                    {submission.submitter_email ? (
+                        <a
+                            href={`mailto:${submission.submitter_email}`}
+                            className="mt-4 inline-flex rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
+                        >
+                            Email submitter
+                        </a>
+                    ) : null}
                 </div>
             </div>
         </div>
@@ -66,7 +74,7 @@ function RuleSetCard({ ruleSet }) {
                     </h3>
                     <p className="mt-2 text-sm text-stone-600">
                         Version {ruleSet.version_number}
-                        {ruleSet.publisher ? ` • Published by ${ruleSet.publisher}` : ''}
+                        {ruleSet.publisher ? ` - Published by ${ruleSet.publisher}` : ''}
                     </p>
                 </div>
                 <StatusBadge value={ruleSet.is_active ? 'approved' : 'closed'} />

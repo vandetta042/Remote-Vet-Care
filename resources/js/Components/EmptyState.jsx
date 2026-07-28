@@ -5,9 +5,11 @@ export default function EmptyState({
     description,
     actionLabel,
     actionHref,
+    illustration,
 }) {
     return (
-        <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-10 text-center shadow-sm">
+        <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white p-8 text-center shadow-sm md:p-10">
+            {illustration ? <div className="mx-auto mb-6 max-w-xl">{illustration}</div> : null}
             <h3 className="text-2xl font-semibold text-stone-900">{title}</h3>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-600">
                 {description}

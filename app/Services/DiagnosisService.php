@@ -14,6 +14,10 @@ class DiagnosisService
      * @param  array<string, mixed>  $animalDetails
      * @return array{
      *     top_matches: array<int, array<string, mixed>>,
+     *     possible_conditions: array<int, array<string, mixed>>,
+     *     care_recommendations: array<int, array<string, mixed>>,
+     *     warnings: array<int, string>,
+     *     urgency_label: string,
      *     urgency_level: string,
      *     primary_score: float|null,
      *     system_suggestion: string,
@@ -51,9 +55,15 @@ class DiagnosisService
             ->get();
 
         if ($diseases->isEmpty()) {
+            $urgencyLevel = $emergencySelected ? 'emergency' : $this->urgencyFromSymptoms($selectedSymptoms);
+
             return [
                 'top_matches' => [],
-                'urgency_level' => $emergencySelected ? 'emergency' : $this->urgencyFromSymptoms($selectedSymptoms),
+                'possible_conditions' => [],
+                'care_recommendations' => $this->buildFallbackCareRecommendations($urgencyLevel, $selectedSymptoms),
+                'warnings' => $this->buildWarnings(null, [], $urgencyLevel, $emergencySelected),
+                'urgency_label' => strtoupper($urgencyLevel),
+                'urgency_level' => $urgencyLevel,
                 'primary_score' => null,
                 'system_suggestion' => 'No published rule-based suggestions are available yet for this animal species.',
                 'system_explanation' => $this->buildNoRuleExplanation(
@@ -66,7 +76,7 @@ class DiagnosisService
         }
 
         $topMatches = $diseases
-            ->map(function (Disease $disease) use ($symptomIds, $riskFactorIds) {
+            ->map(function (Disease $disease) use ($symptomIds, $riskFactorIds, $emergencySelected) {
                 $symptomRules = $disease->symptomRules;
                 $riskRules = $disease->riskFactorRules;
 
@@ -87,11 +97,23 @@ class DiagnosisService
 
                 $matchedRequiredSymptoms = $matchedSymptomRules->where('is_required', true)->count();
                 $requiredSymptoms = $symptomRules->where('is_required', true)->count();
+                $matchedSymptomNames = $matchedSymptomRules
+                    ->pluck('symptom.name')
+                    ->filter()
+                    ->values()
+                    ->all();
+                $missingSymptomNames = $symptomRules
+                    ->reject(fn ($rule) => in_array($rule->symptom_id, $matchedSymptomRules->pluck('symptom_id')->all(), true))
+                    ->pluck('symptom.name')
+                    ->filter()
+                    ->values()
+                    ->all();
 
                 return [
                     'disease_id' => $disease->id,
                     'disease_name' => $disease->name,
                     'score' => $finalScore,
+                    'confidence' => $finalScore,
                     'symptom_score' => $symptomScore,
                     'risk_score' => $riskScore,
                     'severity' => $disease->severity_level,
@@ -99,8 +121,23 @@ class DiagnosisService
                     'requires_vet_attention' => $disease->requires_vet_attention,
                     'requires_lab_test' => $disease->requires_lab_test,
                     'matched_symptoms' => $matchedSymptomRules->count(),
+                    'matched_symptom_names' => $matchedSymptomNames,
+                    'missing_symptom_names' => $missingSymptomNames,
                     'matched_required_symptoms' => $matchedRequiredSymptoms,
                     'required_symptoms' => $requiredSymptoms,
+                    'care_recommendations' => $this->buildCareRecommendations(
+                        disease: $disease,
+                        matchedSymptoms: $matchedSymptomRules->count(),
+                        symptomScore: $symptomScore,
+                        riskScore: $riskScore,
+                        urgencyLevel: $this->urgencyFromDisease($disease->severity_level),
+                    ),
+                    'warnings' => $this->buildWarnings(
+                        disease: $disease,
+                        topMatches: [],
+                        urgencyLevel: $this->urgencyFromDisease($disease->severity_level),
+                        emergencySelected: $emergencySelected,
+                    ),
                     'explanation' => $this->buildMatchExplanation(
                         diseaseName: $disease->name,
                         symptomScore: $symptomScore,
@@ -119,9 +156,15 @@ class DiagnosisService
             ->all();
 
         if ($topMatches === []) {
+            $urgencyLevel = $emergencySelected ? 'emergency' : $this->urgencyFromSymptoms($selectedSymptoms);
+
             return [
                 'top_matches' => [],
-                'urgency_level' => $emergencySelected ? 'emergency' : $this->urgencyFromSymptoms($selectedSymptoms),
+                'possible_conditions' => [],
+                'care_recommendations' => $this->buildFallbackCareRecommendations($urgencyLevel, $selectedSymptoms),
+                'warnings' => $this->buildWarnings(null, [], $urgencyLevel, $emergencySelected),
+                'urgency_label' => strtoupper($urgencyLevel),
+                'urgency_level' => $urgencyLevel,
                 'primary_score' => null,
                 'system_suggestion' => 'No close published rule matches were found from the selected symptoms.',
                 'system_explanation' => 'The system checked the active published rules for this species, but the selected symptoms did not strongly match any disease pattern. A veterinarian review is still recommended.',
@@ -134,6 +177,10 @@ class DiagnosisService
 
         return [
             'top_matches' => $topMatches,
+            'possible_conditions' => $this->buildPossibleConditions($topMatches),
+            'care_recommendations' => $this->buildLeadCareRecommendations($topMatches),
+            'warnings' => $topMatches[0]['warnings'] ?? $this->buildWarnings(null, $topMatches, $urgencyLevel, $emergencySelected),
+            'urgency_label' => strtoupper($urgencyLevel),
             'urgency_level' => $urgencyLevel,
             'primary_score' => $topMatches[0]['score'],
             'system_suggestion' => $this->buildSuggestionSummary($topMatches),
@@ -204,6 +251,197 @@ class DiagnosisService
         return collect($topMatches)
             ->map(fn (array $match) => "{$match['disease_name']} ({$match['score']}%)")
             ->implode('; ');
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $topMatches
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildPossibleConditions(array $topMatches): array
+    {
+        return collect($topMatches)
+            ->map(fn (array $match): array => [
+                'disease_id' => $match['disease_id'],
+                'disease_name' => $match['disease_name'],
+                'confidence' => $match['confidence'],
+                'matched_symptoms' => $match['matched_symptom_names'],
+                'missing_symptoms' => $match['missing_symptom_names'],
+                'urgency_level' => $this->urgencyFromDisease($match['severity']),
+                'care_recommendations' => $match['care_recommendations'],
+                'warnings' => $match['warnings'],
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $topMatches
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildLeadCareRecommendations(array $topMatches): array
+    {
+        $lead = $topMatches[0] ?? null;
+
+        if (! $lead) {
+            return [];
+        }
+
+        return $lead['care_recommendations'] ?? [];
+    }
+
+    /**
+     * @param  Collection<int, Symptom>  $selectedSymptoms
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildFallbackCareRecommendations(string $urgencyLevel, Collection $selectedSymptoms): array
+    {
+        $recommendations = [
+            'Provide clean drinking water.',
+            'Reduce stress and keep the animal in a quiet, comfortable space.',
+            'Keep the animal warm and maintain good hygiene around the animal.',
+            'Observe appetite, drinking, breathing, and body temperature closely.',
+        ];
+
+        if ($urgencyLevel === 'high' || $urgencyLevel === 'emergency') {
+            $recommendations[] = 'Seek veterinary attention as soon as possible.';
+        }
+
+        if ($selectedSymptoms->contains(fn (Symptom $symptom) => $symptom->severity_level === 'emergency')) {
+            $recommendations[] = 'Treat this as urgent and arrange immediate veterinary review.';
+        }
+
+        return collect($recommendations)
+            ->unique()
+            ->values()
+            ->map(fn (string $item): array => [
+                'recommendation' => $item,
+                'priority' => 'supportive',
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildCareRecommendations(
+        Disease $disease,
+        int $matchedSymptoms,
+        float $symptomScore,
+        ?float $riskScore,
+        string $urgencyLevel,
+    ): array {
+        $recommendations = $this->splitCareAdvice($disease->general_care_advice);
+
+        if ($recommendations === []) {
+            $recommendations = $this->buildFallbackCareRecommendations($urgencyLevel, collect());
+        }
+
+        if ($disease->requires_vet_attention) {
+            $recommendations[] = [
+                'recommendation' => 'Arrange veterinary review.',
+                'priority' => 'high',
+            ];
+        }
+
+        if ($disease->requires_lab_test) {
+            $recommendations[] = [
+                'recommendation' => 'A veterinarian may recommend confirmatory testing.',
+                'priority' => 'supportive',
+            ];
+        }
+
+        return collect($recommendations)
+            ->unique('recommendation')
+            ->values()
+            ->map(function (array $item, int $index) use ($matchedSymptoms, $symptomScore, $riskScore, $urgencyLevel): array {
+                return [
+                    'priority_order' => $index + 1,
+                    'recommendation' => $item['recommendation'],
+                    'priority' => $item['priority'] ?? ($index === 0 ? 'high' : 'supportive'),
+                    'warning_notes' => match (true) {
+                        $urgencyLevel === 'emergency' => 'Immediate veterinary attention is recommended.',
+                        $urgencyLevel === 'high' => 'Monitor closely and avoid delaying care.',
+                        default => null,
+                    },
+                    'matched_symptoms' => $matchedSymptoms,
+                    'symptom_score' => $symptomScore,
+                    'risk_score' => $riskScore,
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function splitCareAdvice(?string $careAdvice): array
+    {
+        if (! filled($careAdvice)) {
+            return [];
+        }
+
+        $chunks = preg_split('/[\r\n]+|(?<=[.!?])\s+|;\s*/', $careAdvice) ?: [];
+
+        return collect($chunks)
+            ->map(fn (string $item): string => trim($item))
+            ->filter()
+            ->map(fn (string $item): array => [
+                'recommendation' => rtrim($item, ". \t\n\r\0\x0B"),
+                'priority' => 'supportive',
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $topMatches
+     * @return array<int, string>
+     */
+    /**
+     * @param  array<int, array<string, mixed>>  $topMatches
+     * @return array<int, string>
+     */
+    protected function buildWarnings(
+        ?Disease $disease,
+        array $topMatches,
+        string $urgencyLevel,
+        bool $emergencySelected,
+    ): array
+    {
+        $warnings = [
+            'These suggestions are generated automatically from validated veterinary knowledge and are intended to support decision-making.',
+            'Final diagnosis and treatment remain the responsibility of the attending veterinarian.',
+        ];
+
+        if ($disease?->requires_vet_attention) {
+            $warnings[] = 'Seek veterinary attention as soon as possible.';
+        }
+
+        if ($urgencyLevel === 'high' || $urgencyLevel === 'emergency') {
+            $warnings[] = 'How Soon Your Animal Needs Care: ' . strtoupper($urgencyLevel);
+        }
+
+        if ($emergencySelected) {
+            $warnings[] = 'An emergency sign was selected, so urgent veterinary review is advised.';
+        }
+
+        if (
+            ($disease?->requires_lab_test ?? false)
+            || collect($topMatches)->contains(fn (array $match) => (bool) ($match['requires_lab_test'] ?? false))
+        ) {
+            $warnings[] = 'A veterinarian may request lab tests to confirm the condition.';
+        }
+
+        return collect($warnings)->unique()->values()->all();
+    }
+
+    protected function urgencyFromDisease(string $severityLevel): string
+    {
+        return match ($severityLevel) {
+            'emergency' => 'emergency',
+            'severe' => 'high',
+            'moderate' => 'medium',
+            default => 'low',
+        };
     }
 
     /**

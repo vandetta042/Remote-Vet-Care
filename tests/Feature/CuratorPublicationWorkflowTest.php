@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\KnowledgeSubmission;
+use App\Models\PublishedRuleSet;
 use App\Models\Species;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,6 +35,8 @@ class CuratorPublicationWorkflowTest extends TestCase
             'reviewed_at' => now(),
             'metadata' => [
                 'care_advice' => 'Immediate isolation and hydration support.',
+                'care_recommendations' => "Immediate isolation and hydration support.\nKeep the animal warm.",
+                'care_urgency_level' => 'high',
             ],
         ]);
 
@@ -55,6 +58,8 @@ class CuratorPublicationWorkflowTest extends TestCase
                 'severity_level' => 'severe',
                 'transmission_mode' => 'contact',
                 'general_care_advice' => 'Immediate isolation and hydration support.',
+                'care_recommendations' => "Immediate isolation and hydration support.\nKeep the animal warm.",
+                'care_urgency_level' => 'high',
                 'requires_vet_attention' => true,
                 'requires_lab_test' => true,
                 'version_number' => '1.0',
@@ -79,5 +84,12 @@ class CuratorPublicationWorkflowTest extends TestCase
         ]);
         $this->assertDatabaseCount('disease_symptom_rules', 1);
         $this->assertDatabaseCount('disease_risk_factor_rules', 1);
+
+        $publishedRuleSet = PublishedRuleSet::query()->latest()->firstOrFail();
+        $this->assertSame(
+            ['Immediate isolation and hydration support.', 'Keep the animal warm.'],
+            $publishedRuleSet->rules_json['care_recommendations'],
+        );
+        $this->assertSame('high', $publishedRuleSet->rules_json['care_urgency_level']);
     }
 }

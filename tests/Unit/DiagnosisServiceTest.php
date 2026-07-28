@@ -104,10 +104,15 @@ class DiagnosisServiceTest extends TestCase
         );
 
         $this->assertSame('high', $result['urgency_level']);
+        $this->assertSame('HIGH', $result['urgency_label']);
         $this->assertSame('Canine Parvovirus', $result['top_matches'][0]['disease_name']);
         $this->assertEquals(100.0, $result['top_matches'][0]['score']);
         $this->assertStringContainsString('Canine Parvovirus', $result['system_suggestion']);
         $this->assertStringContainsString('professional diagnosis', $result['system_explanation']);
+        $this->assertNotEmpty($result['possible_conditions']);
+        $this->assertNotEmpty($result['care_recommendations']);
+        $this->assertContains('Immediate isolation and hydration support', array_column($result['care_recommendations'], 'recommendation'));
+        $this->assertNotEmpty($result['warnings']);
     }
 
     public function test_it_handles_missing_published_rules_gracefully(): void
@@ -128,5 +133,8 @@ class DiagnosisServiceTest extends TestCase
         $this->assertSame([], $result['top_matches']);
         $this->assertSame('emergency', $result['urgency_level']);
         $this->assertStringContainsString('No published rule-based suggestions', $result['system_suggestion']);
+        $this->assertSame('EMERGENCY', $result['urgency_label']);
+        $this->assertNotEmpty($result['care_recommendations']);
+        $this->assertNotEmpty($result['warnings']);
     }
 }

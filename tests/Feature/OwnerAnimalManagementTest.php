@@ -6,7 +6,9 @@ use App\Models\Animal;
 use App\Models\Breed;
 use App\Models\Species;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OwnerAnimalManagementTest extends TestCase
@@ -15,6 +17,8 @@ class OwnerAnimalManagementTest extends TestCase
 
     public function test_owner_can_create_an_animal_profile(): void
     {
+        Storage::fake('public');
+
         $owner = User::factory()->create([
             'role' => User::ROLE_OWNER,
         ]);
@@ -25,6 +29,10 @@ class OwnerAnimalManagementTest extends TestCase
             'species_id' => $species->id,
             'name' => 'Mixed Breed',
         ]);
+
+        $tinyPng = base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z7WQAAAAASUVORK5CYII='
+        );
 
         $response = $this->actingAs($owner)->post(route('owner.animals.store'), [
             'name' => 'Bingo',
@@ -38,6 +46,7 @@ class OwnerAnimalManagementTest extends TestCase
             'vaccination_status' => 'up_to_date',
             'medical_history' => 'Recovered from mild cough.',
             'location' => 'Makurdi',
+            'profile_photo' => UploadedFile::fake()->createWithContent('bingo.png', $tinyPng),
         ]);
 
         $response->assertRedirect();
@@ -46,6 +55,10 @@ class OwnerAnimalManagementTest extends TestCase
             'name' => 'Bingo',
             'species_id' => $species->id,
         ]);
+
+        $animal = Animal::query()->latest()->firstOrFail();
+        $this->assertNotNull($animal->profile_photo_path);
+        Storage::disk('public')->assertExists($animal->profile_photo_path);
     }
 
     public function test_owner_cannot_view_another_owner_animal_profile(): void

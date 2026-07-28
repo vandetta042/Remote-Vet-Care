@@ -5,6 +5,7 @@ import ResearchLayout from '@/Layouts/ResearchLayout';
 import ReviewerLayout from '@/Layouts/ReviewerLayout';
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import VetLayout from '@/Layouts/VetLayout';
+import AnimalIllustration from '@/Components/AnimalIllustration';
 import { Head, Link } from '@inertiajs/react';
 
 function statToneClasses(tone) {
@@ -63,6 +64,7 @@ export default function Dashboard({
     title,
     roleLabel,
     description,
+    ownerAnimals = [],
     stats,
     quickLinks,
     spotlight,
@@ -96,7 +98,99 @@ export default function Dashboard({
                 <Head title={title} />
 
                 <div className="space-y-6">
-                    {sharedStats}
+                    <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                        <div className="rounded-[2rem] border border-amber-100 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6 shadow-sm md:p-8">
+                            <p className="text-xs uppercase tracking-[0.3em] text-amber-700">
+                                Animal Care Center
+                            </p>
+                            <h3 className="mt-3 text-3xl font-semibold text-stone-900 md:text-4xl">
+                                How are your animals today?
+                            </h3>
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
+                                Start with an animal profile or send a care request if something
+                                feels off. Everything important is close by, without the noise.
+                            </p>
+
+                            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                                {quickLinks.slice(0, 2).map((item) => (
+                                    <ActionCard key={item.label} item={item} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* <AnimalIllustration
+                            species="Family Animal Care"
+                            title="A calm place to start"
+                            subtitle="Friendly guidance, clear next steps, and supportive care for every animal."
+                            imageSrc="/images/remote-vet/pets-group.png"
+                        /> */}
+                    </section>
+
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                Your Animals
+                            </p>
+                            <h3 className="text-2xl font-semibold text-stone-900">
+                                Jump back into an animal profile
+                            </h3>
+                            <p className="max-w-3xl text-sm leading-6 text-stone-600">
+                                Pick an animal to update its photo, check its details, or start a new care request.
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            {ownerAnimals.length === 0 ? (
+                                <div className="rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-6 text-sm text-stone-600 md:col-span-2 xl:col-span-4">
+                                    No animal profiles yet. Add one first so care requests stay simple and visual.
+                                </div>
+                            ) : (
+                                ownerAnimals.map((animal) => (
+                                    <Link
+                                        key={animal.id}
+                                        href={route('owner.animals.show', animal.id)}
+                                        className="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-stone-900"
+                                    >
+                                        <div className="h-40 overflow-hidden bg-gradient-to-br from-amber-100 via-stone-50 to-white">
+                                            {animal.profile_photo_url ? (
+                                                <img
+                                                    src={animal.profile_photo_url}
+                                                    alt={animal.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center">
+                                                    <div className="rounded-full bg-white px-5 py-4 text-center shadow-sm ring-1 ring-stone-200">
+                                                        <p className="text-xs uppercase tracking-[0.25em] text-stone-500">
+                                                            {animal.species ?? 'Animal'}
+                                                        </p>
+                                                        <p className="mt-2 text-sm font-semibold text-stone-900">
+                                                            Add a photo
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-4">
+                                            <p className="text-xs uppercase tracking-[0.25em] text-stone-500">
+                                                {animal.species ?? 'Animal'}
+                                            </p>
+                                            <h4 className="mt-2 text-lg font-semibold text-stone-900">
+                                                {animal.name}
+                                            </h4>
+                                            <p className="mt-2 text-sm text-stone-600">
+                                                {animal.breed ?? 'Breed not set'}
+                                            </p>
+                                            <p className="mt-2 text-xs text-stone-500">
+                                                {animal.age ?? 'Age not set'}
+                                                {animal.location ? ` - ${animal.location}` : ''}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
+                    </section>
 
                     <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
                         <div className="flex flex-col gap-2">
@@ -117,6 +211,24 @@ export default function Dashboard({
                                 <ActionCard key={item.label} item={item} />
                             ))}
                         </div>
+                    </section>
+
+                    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        {stats.slice(0, 4).map((stat) => (
+                            <div
+                                key={stat.label}
+                                className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm"
+                            >
+                                <span
+                                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ring-1 ${statToneClasses(stat.tone)}`}
+                                >
+                                    {stat.label}
+                                </span>
+                                <p className="mt-5 text-4xl font-semibold text-stone-900">
+                                    {stat.value}
+                                </p>
+                            </div>
+                        ))}
                     </section>
 
                     <section

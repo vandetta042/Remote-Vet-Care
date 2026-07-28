@@ -32,16 +32,22 @@ class RemoteVetCareDemoSeeder extends Seeder
         $ownerC = $this->createUser('Ibrahim Audu', 'owner3@remotevet.test', User::ROLE_OWNER);
 
         $dog = Species::create(['name' => 'Dog', 'description' => 'Domestic dogs']);
+        $cat = Species::create(['name' => 'Cat', 'description' => 'Domestic cats']);
         $goat = Species::create(['name' => 'Goat', 'description' => 'Goats']);
         $cattle = Species::create(['name' => 'Cattle', 'description' => 'Cattle']);
         $poultry = Species::create(['name' => 'Poultry', 'description' => 'Domestic birds']);
+        $rabbit = Species::create(['name' => 'Rabbit', 'description' => 'Domestic rabbits']);
+        $fish = Species::create(['name' => 'Fish', 'description' => 'Aquatic animals']);
 
         foreach ([
             [$dog, 'German Shepherd'],
             [$dog, 'Local Mixed Breed'],
+            [$cat, 'Domestic Shorthair'],
+            [$cat, 'Persian'],
             [$goat, 'West African Dwarf'],
             [$cattle, 'White Fulani'],
             [$poultry, 'Broiler'],
+            [$rabbit, 'New Zealand White'],
         ] as [$species, $name]) {
             Breed::create([
                 'species_id' => $species->id,
@@ -65,6 +71,17 @@ class RemoteVetCareDemoSeeder extends Seeder
             ['Swollen udder', 'severe'],
             ['Reduced milk production', 'moderate'],
             ['Breathing difficulty', 'emergency'],
+            ['Ear discharge', 'moderate'],
+            ['Head shaking', 'moderate'],
+            ['Sneezing', 'moderate'],
+            ['Runny nose', 'moderate'],
+            ['Drooping wings', 'moderate'],
+            ['Swollen abdomen', 'emergency'],
+            ['Restlessness', 'moderate'],
+            ['Recumbency', 'emergency'],
+            ['White spots', 'moderate'],
+            ['Lethargy', 'moderate'],
+            ['Reduced feeding', 'moderate'],
         ])->mapWithKeys(fn (array $item) => [
             $item[0] => Symptom::create([
                 'name' => $item[0],
@@ -79,6 +96,12 @@ class RemoteVetCareDemoSeeder extends Seeder
             'Wet housing conditions',
             'Poor udder hygiene',
             'Overcrowding',
+            'Poor ventilation',
+            'Late pregnancy',
+            'Poor feed intake',
+            'Lush pasture',
+            'Rapid feed change',
+            'Poor water quality',
         ])->mapWithKeys(fn (string $name) => [
             $name => RiskFactor::create(['name' => $name]),
         ]);
@@ -137,6 +160,69 @@ class RemoteVetCareDemoSeeder extends Seeder
                 'lab' => true,
                 'symptoms' => [['Greenish diarrhea', 3, true], ['Twisted neck', 5, true], ['Breathing difficulty', 4, true]],
                 'risks' => [['Overcrowding', 2], ['No recent vaccination', 3]],
+            ],
+            [
+                'name' => 'Feline Panleukopenia',
+                'species' => $cat,
+                'severity' => 'emergency',
+                'advice' => 'Keep the cat isolated, support hydration, and seek urgent veterinary care.',
+                'lab' => true,
+                'symptoms' => [['Vomiting', 4, true], ['Fever', 4, true], ['Loss of appetite', 3, true], ['Weakness', 3, false]],
+                'risks' => [['Poor sanitation', 2], ['No recent vaccination', 3], ['Overcrowding', 2]],
+            ],
+            [
+                'name' => 'Canine Otitis Externa',
+                'species' => $dog,
+                'severity' => 'moderate',
+                'advice' => 'Keep the ears dry, avoid scratching, and arrange a vet ear examination.',
+                'lab' => false,
+                'symptoms' => [['Ear discharge', 4, true], ['Head shaking', 4, true], ['Itching', 2, false]],
+                'risks' => [['Poor sanitation', 1], ['Wet housing conditions', 2]],
+            ],
+            [
+                'name' => 'Pregnancy Toxemia',
+                'species' => $goat,
+                'severity' => 'emergency',
+                'advice' => 'Provide calm handling, energy support, and urgent veterinary intervention.',
+                'lab' => true,
+                'symptoms' => [['Weakness', 4, true], ['Loss of appetite', 4, true], ['Recumbency', 5, true]],
+                'risks' => [['Late pregnancy', 3], ['Poor feed intake', 3]],
+            ],
+            [
+                'name' => 'Poultry Coccidiosis',
+                'species' => $poultry,
+                'severity' => 'high',
+                'advice' => 'Improve litter dryness, isolate affected birds, and monitor the flock closely.',
+                'lab' => true,
+                'symptoms' => [['Bloody diarrhea', 4, true], ['Drooping wings', 3, true], ['Weakness', 3, false]],
+                'risks' => [['Wet housing conditions', 3], ['Overcrowding', 2]],
+            ],
+            [
+                'name' => 'Bovine Bloat',
+                'species' => $cattle,
+                'severity' => 'emergency',
+                'advice' => 'Remove access to feed, walk the animal calmly, and call a veterinarian urgently.',
+                'lab' => false,
+                'symptoms' => [['Swollen abdomen', 5, true], ['Breathing difficulty', 4, true], ['Restlessness', 3, false]],
+                'risks' => [['Lush pasture', 3], ['Rapid feed change', 3]],
+            ],
+            [
+                'name' => 'Rabbit Snuffles',
+                'species' => $rabbit,
+                'severity' => 'moderate',
+                'advice' => 'Separate the rabbit, keep the housing warm, and arrange veterinary review.',
+                'lab' => false,
+                'symptoms' => [['Sneezing', 4, true], ['Runny nose', 4, true], ['Reduced feeding', 2, false]],
+                'risks' => [['Poor ventilation', 3], ['Overcrowding', 1]],
+            ],
+            [
+                'name' => 'Fish White Spot Disease',
+                'species' => $fish,
+                'severity' => 'moderate',
+                'advice' => 'Stabilize water quality, reduce stress, and monitor the tank closely.',
+                'lab' => false,
+                'symptoms' => [['White spots', 4, true], ['Lethargy', 3, false], ['Reduced feeding', 2, false]],
+                'risks' => [['Poor water quality', 3], ['Overcrowding', 1]],
             ],
         ];
 
@@ -268,6 +354,108 @@ class RemoteVetCareDemoSeeder extends Seeder
         ]);
         $caseC->symptoms()->sync([$symptoms['Swollen udder']->id, $symptoms['Reduced milk production']->id]);
 
+        $animalD = Animal::create([
+            'owner_id' => $ownerA->id,
+            'name' => 'Mimi',
+            'species_id' => $cat->id,
+            'breed_id' => Breed::where('name', 'Persian')->value('id'),
+            'age' => '3 years',
+            'age_group' => 'adult',
+            'gender' => 'female',
+            'weight' => 4.20,
+            'vaccination_status' => 'unknown',
+            'location' => 'Makurdi',
+        ]);
+        $animalE = Animal::create([
+            'owner_id' => $ownerB->id,
+            'name' => 'Bunny',
+            'species_id' => $rabbit->id,
+            'breed_id' => Breed::where('name', 'New Zealand White')->value('id'),
+            'age' => '1 year',
+            'age_group' => 'young',
+            'gender' => 'female',
+            'weight' => 2.80,
+            'vaccination_status' => 'partial',
+            'location' => 'Gboko',
+        ]);
+
+        $catDiagnosis = app(DiagnosisService::class)->analyze(
+            speciesId: $cat->id,
+            symptomIds: [$symptoms['Vomiting']->id, $symptoms['Fever']->id, $symptoms['Loss of appetite']->id],
+            riskFactorIds: [$riskFactors['Poor sanitation']->id, $riskFactors['No recent vaccination']->id],
+            animalDetails: ['name' => $animalD->name],
+            caseDescription: 'Cat with vomiting, fever, and no appetite.',
+        );
+
+        $caseD = VeterinaryCase::create([
+            'owner_id' => $ownerA->id,
+            'animal_id' => $animalD->id,
+            'assigned_vet_id' => $vetA->id,
+            'title' => 'Vomiting and fever in cat',
+            'description' => 'The cat is vomiting, has a fever, and will not eat.',
+            'duration' => '1 day',
+            'location' => 'Makurdi',
+            'status' => 'vet_responded',
+            'urgency_level' => $catDiagnosis['urgency_level'],
+            'system_suggestion' => json_encode($catDiagnosis),
+            'system_score' => $catDiagnosis['primary_score'],
+            'system_explanation' => $catDiagnosis['system_explanation'],
+            'vet_diagnosis' => 'Possible feline panleukopenia pending clinical review.',
+            'vet_advice' => 'Keep the cat isolated and seek urgent veterinary attention.',
+            'follow_up_date' => now()->addDays(2)->toDateString(),
+        ]);
+        $caseD->symptoms()->sync([$symptoms['Vomiting']->id, $symptoms['Fever']->id, $symptoms['Loss of appetite']->id]);
+        $caseD->riskFactors()->sync([$riskFactors['Poor sanitation']->id, $riskFactors['No recent vaccination']->id]);
+
+        $rabbitDiagnosis = app(DiagnosisService::class)->analyze(
+            speciesId: $rabbit->id,
+            symptomIds: [$symptoms['Sneezing']->id, $symptoms['Runny nose']->id, $symptoms['Reduced feeding']->id],
+            riskFactorIds: [$riskFactors['Poor ventilation']->id, $riskFactors['Overcrowding']->id],
+            animalDetails: ['name' => $animalE->name],
+            caseDescription: 'Rabbit sneezing with runny nose and poor appetite.',
+        );
+
+        $caseE = VeterinaryCase::create([
+            'owner_id' => $ownerB->id,
+            'animal_id' => $animalE->id,
+            'title' => 'Sneezing and runny nose',
+            'description' => 'The rabbit is sneezing often and has a runny nose.',
+            'duration' => '4 days',
+            'location' => 'Gboko',
+            'status' => 'submitted',
+            'urgency_level' => $rabbitDiagnosis['urgency_level'],
+            'system_suggestion' => json_encode($rabbitDiagnosis),
+            'system_score' => $rabbitDiagnosis['primary_score'],
+            'system_explanation' => $rabbitDiagnosis['system_explanation'],
+        ]);
+        $caseE->symptoms()->sync([$symptoms['Sneezing']->id, $symptoms['Runny nose']->id, $symptoms['Reduced feeding']->id]);
+        $caseE->riskFactors()->sync([$riskFactors['Poor ventilation']->id, $riskFactors['Overcrowding']->id]);
+
+        $bloatDiagnosis = app(DiagnosisService::class)->analyze(
+            speciesId: $cattle->id,
+            symptomIds: [$symptoms['Swollen abdomen']->id, $symptoms['Breathing difficulty']->id, $symptoms['Restlessness']->id],
+            riskFactorIds: [$riskFactors['Lush pasture']->id, $riskFactors['Rapid feed change']->id],
+            animalDetails: ['name' => $animalC->name],
+            caseDescription: 'Cattle with swollen abdomen and breathing difficulty.',
+        );
+
+        $caseF = VeterinaryCase::create([
+            'owner_id' => $ownerC->id,
+            'animal_id' => $animalC->id,
+            'assigned_vet_id' => $vetB->id,
+            'title' => 'Swollen abdomen and breathing difficulty',
+            'description' => 'The cow is bloated, restless, and breathing with effort.',
+            'duration' => '6 hours',
+            'location' => 'Lafia',
+            'status' => 'under_review',
+            'urgency_level' => $bloatDiagnosis['urgency_level'],
+            'system_suggestion' => json_encode($bloatDiagnosis),
+            'system_score' => $bloatDiagnosis['primary_score'],
+            'system_explanation' => $bloatDiagnosis['system_explanation'],
+        ]);
+        $caseF->symptoms()->sync([$symptoms['Swollen abdomen']->id, $symptoms['Breathing difficulty']->id, $symptoms['Restlessness']->id]);
+        $caseF->riskFactors()->sync([$riskFactors['Lush pasture']->id, $riskFactors['Rapid feed change']->id]);
+
         $draft = KnowledgeSubmission::create([
             'submitted_by' => $researcherA->id,
             'title' => 'Draft note on poultry respiratory distress',
@@ -275,7 +463,11 @@ class RemoteVetCareDemoSeeder extends Seeder
             'species_id' => $poultry->id,
             'summary' => 'A draft summary covering breathing difficulty and flock exposure factors in poultry.',
             'status' => 'draft',
-            'metadata' => ['care_advice' => 'Separate affected birds and improve ventilation.'],
+            'metadata' => [
+                'care_advice' => 'Separate affected birds and improve ventilation.',
+                'care_recommendations' => "Separate affected birds from the flock.\nImprove airflow and reduce dust.\nMonitor water intake and feeding behaviour.",
+                'care_urgency_level' => 'high',
+            ],
         ]);
         $draft->symptoms()->create([
             'symptom_name' => 'Breathing difficulty',
@@ -318,7 +510,11 @@ class RemoteVetCareDemoSeeder extends Seeder
             'status' => 'approved',
             'reviewer_id' => $reviewer->id,
             'reviewed_at' => now()->subHours(8),
-            'metadata' => ['care_advice' => 'Improve hygiene and inspect for mites.'],
+            'metadata' => [
+                'care_advice' => 'Improve hygiene and inspect for mites.',
+                'care_recommendations' => "Improve hygiene and inspect for mites.\nWash bedding regularly and reduce stress.",
+                'care_urgency_level' => 'moderate',
+            ],
         ]);
         $approved->symptoms()->createMany([
             ['symptom_name' => 'Hair loss', 'symptom_weight' => 3, 'severity_level' => 'mild'],
@@ -334,6 +530,91 @@ class RemoteVetCareDemoSeeder extends Seeder
             'decision' => 'approved',
             'comments' => 'Sufficient evidence to move to curation.',
             'reviewed_at' => now()->subHours(8),
+        ]);
+
+        $approvedCat = KnowledgeSubmission::create([
+            'submitted_by' => $researcherB->id,
+            'title' => 'Cat panleukopenia field summary',
+            'disease_name' => 'Feline Panleukopenia',
+            'species_id' => $cat->id,
+            'summary' => 'A vetted summary covering vomiting, fever, and anorexia in cats with high-risk exposure patterns.',
+            'status' => 'approved',
+            'reviewer_id' => $reviewer->id,
+            'reviewed_at' => now()->subHours(4),
+            'metadata' => [
+                'care_advice' => 'Keep the cat isolated and monitor hydration.',
+                'care_recommendations' => "Keep the cat isolated.\nSupport hydration carefully.\nSeek urgent veterinary care.",
+                'care_urgency_level' => 'emergency',
+            ],
+        ]);
+        $approvedCat->symptoms()->createMany([
+            ['symptom_name' => 'Vomiting', 'symptom_weight' => 4, 'severity_level' => 'severe'],
+            ['symptom_name' => 'Fever', 'symptom_weight' => 4, 'severity_level' => 'severe'],
+            ['symptom_name' => 'Loss of appetite', 'symptom_weight' => 3, 'severity_level' => 'moderate'],
+        ]);
+        $approvedCat->riskFactors()->createMany([
+            ['risk_factor_name' => 'Poor sanitation', 'weight' => 2],
+            ['risk_factor_name' => 'No recent vaccination', 'weight' => 3],
+        ]);
+        $approvedCat->sources()->create([
+            'source_title' => 'Feline internal medicine reference',
+            'source_type' => 'textbook',
+        ]);
+        KnowledgeReview::create([
+            'knowledge_submission_id' => $approvedCat->id,
+            'reviewed_by' => $reviewer->id,
+            'decision' => 'approved',
+            'comments' => 'Strong fit for the curated feline emergency rule base.',
+            'reviewed_at' => now()->subHours(4),
+        ]);
+
+        $submittedCattle = KnowledgeSubmission::create([
+            'submitted_by' => $researcherA->id,
+            'title' => 'Cattle bloat emergency note',
+            'disease_name' => 'Bovine Bloat',
+            'species_id' => $cattle->id,
+            'summary' => 'Emergency field note describing swollen abdomen, breathing difficulty, and feed change risks in cattle.',
+            'status' => 'submitted',
+            'submitted_at' => now()->subHours(12),
+            'metadata' => [
+                'care_advice' => 'Stop feed access and seek urgent help.',
+                'care_recommendations' => "Remove access to fresh feed.\nWalk the animal calmly.\nCall a veterinarian urgently.",
+                'care_urgency_level' => 'emergency',
+            ],
+        ]);
+        $submittedCattle->symptoms()->createMany([
+            ['symptom_name' => 'Swollen abdomen', 'symptom_weight' => 5, 'severity_level' => 'emergency'],
+            ['symptom_name' => 'Breathing difficulty', 'symptom_weight' => 4, 'severity_level' => 'emergency'],
+        ]);
+        $submittedCattle->riskFactors()->createMany([
+            ['risk_factor_name' => 'Lush pasture', 'weight' => 3],
+            ['risk_factor_name' => 'Rapid feed change', 'weight' => 3],
+        ]);
+        $submittedCattle->sources()->create([
+            'source_title' => 'Ruminant emergency care guideline',
+            'source_type' => 'guideline',
+        ]);
+
+        $draftRabbit = KnowledgeSubmission::create([
+            'submitted_by' => $researcherB->id,
+            'title' => 'Rabbit respiratory note',
+            'disease_name' => 'Rabbit Snuffles',
+            'species_id' => $rabbit->id,
+            'summary' => 'A draft note about sneezing, runny nose, and ventilation concerns in domestic rabbits.',
+            'status' => 'draft',
+            'metadata' => [
+                'care_advice' => 'Keep the rabbit warm and reduce dust.',
+                'care_recommendations' => "Separate the rabbit.\nKeep the housing warm.\nImprove ventilation.",
+                'care_urgency_level' => 'moderate',
+            ],
+        ]);
+        $draftRabbit->symptoms()->createMany([
+            ['symptom_name' => 'Sneezing', 'symptom_weight' => 4, 'severity_level' => 'moderate'],
+            ['symptom_name' => 'Runny nose', 'symptom_weight' => 4, 'severity_level' => 'moderate'],
+        ]);
+        $draftRabbit->sources()->create([
+            'source_title' => 'Small mammal husbandry note',
+            'source_type' => 'field_report',
         ]);
 
         $ownerA->userNotifications()->create([

@@ -115,6 +115,23 @@ export default function Show({ submission, canEdit, canSubmit }) {
                                     'Not provided'}
                             </p>
                         </div>
+                        <div className="mt-4 grid gap-4 md:grid-cols-2">
+                            <Info
+                                label="Care Urgency"
+                                value={
+                                    submission.metadata?.care_urgency_level ??
+                                    'Not set'
+                                }
+                            />
+                            <Info
+                                label="Care Recommendations"
+                                value={
+                                    submission.metadata?.care_recommendations ??
+                                    submission.metadata?.care_advice ??
+                                    'Not provided'
+                                }
+                            />
+                        </div>
                     </Panel>
 
                     <Panel title="Symptoms">

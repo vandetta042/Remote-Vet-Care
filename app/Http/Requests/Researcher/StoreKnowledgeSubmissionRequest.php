@@ -27,6 +27,8 @@ class StoreKnowledgeSubmissionRequest extends FormRequest
             'metadata.affected_species_note' => ['nullable', 'string', 'max:255'],
             'metadata.severity_note' => ['nullable', 'string', 'max:255'],
             'metadata.care_advice' => ['nullable', 'string'],
+            'metadata.care_recommendations' => ['nullable', 'string'],
+            'metadata.care_urgency_level' => ['nullable', Rule::in(['low', 'moderate', 'high', 'emergency'])],
             'symptoms' => ['nullable', 'array'],
             'symptoms.*.symptom_name' => ['nullable', 'string', 'max:255'],
             'symptoms.*.symptom_description' => ['nullable', 'string'],

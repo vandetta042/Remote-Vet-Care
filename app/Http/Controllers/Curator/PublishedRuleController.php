@@ -53,6 +53,8 @@ class PublishedRuleController extends Controller
             'reviews.reviewer:id,name',
         ]);
 
+        $metadata = $knowledgeSubmission->metadata ?? [];
+
         return Inertia::render('Curator/PublishedRules/Show', [
             'submission' => $knowledgeSubmission,
             'defaults' => [
@@ -60,7 +62,11 @@ class PublishedRuleController extends Controller
                 'description' => $knowledgeSubmission->summary,
                 'severity_level' => 'moderate',
                 'transmission_mode' => '',
-                'general_care_advice' => $knowledgeSubmission->metadata['care_advice'] ?? '',
+                'general_care_advice' => $metadata['care_advice'] ?? '',
+                'care_recommendations' => $metadata['care_recommendations']
+                    ?? $metadata['care_advice']
+                    ?? '',
+                'care_urgency_level' => $metadata['care_urgency_level'] ?? 'moderate',
                 'requires_vet_attention' => true,
                 'requires_lab_test' => false,
                 'version_number' => '1.0',

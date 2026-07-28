@@ -36,6 +36,22 @@ class DashboardController extends Controller
             title: 'Home',
             roleLabel: 'Animal Owner',
             description: 'What do you want to do for your animal today?',
+            ownerAnimals: Animal::query()
+                ->with(['species:id,name', 'breed:id,name'])
+                ->where('owner_id', $user->id)
+                ->latest()
+                ->take(4)
+                ->get()
+                ->map(fn (Animal $animal): array => [
+                    'id' => $animal->id,
+                    'name' => $animal->name,
+                    'species' => $animal->species?->name,
+                    'breed' => $animal->breed?->name,
+                    'age' => $animal->age,
+                    'location' => $animal->location,
+                    'profile_photo_url' => $animal->profile_photo_url,
+                ])
+                ->all(),
             stats: [
                 ['label' => 'Animals Registered', 'value' => Animal::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
                 ['label' => 'Care Requests', 'value' => VeterinaryCase::where('owner_id', $user->id)->count(), 'tone' => 'neutral'],
@@ -44,6 +60,7 @@ class DashboardController extends Controller
                 ['label' => 'Emergency Signs', 'value' => VeterinaryCase::where('owner_id', $user->id)->where('urgency_level', 'emergency')->count(), 'tone' => 'danger'],
             ],
             quickLinks: [
+                ['label' => 'Add an Animal', 'href' => route('owner.animals.create'), 'description' => 'Create a profile with a photo so future care requests feel simpler.'],
                 ['label' => 'Report a Sick Animal', 'href' => route('owner.cases.create'), 'description' => 'Share the signs you noticed, the details, and any photo or document you want the vet to see.'],
                 ['label' => 'My Animals', 'href' => route('owner.animals.index'), 'description' => 'Keep each animal profile ready for faster care requests.'],
                 ['label' => 'My Care Requests', 'href' => route('owner.cases.index'), 'description' => 'See every request, current status, and any updates from the vet.'],
@@ -289,8 +306,11 @@ class DashboardController extends Controller
                 'published_at' => $submission->published_at?->format('M j, Y'),
                 'reviews_count' => $submission->reviews_count,
                 'submitter' => $submission->submitter?->name,
+                'submitter_email' => $submission->submitter?->email,
                 'reviewer' => $submission->reviewer?->name,
+                'reviewer_email' => $submission->reviewer?->email,
                 'curator' => $submission->curator?->name,
+                'curator_email' => $submission->curator?->email,
                 'species' => $submission->species?->name,
             ]);
 
@@ -332,11 +352,13 @@ class DashboardController extends Controller
         array $stats,
         array $quickLinks,
         array $spotlight,
+        array $ownerAnimals = [],
     ): Response {
         return Inertia::render('Portal/Dashboard', [
             'title' => $title,
             'roleLabel' => $roleLabel,
             'description' => $description,
+            'ownerAnimals' => $ownerAnimals,
             'stats' => $stats,
             'quickLinks' => $quickLinks,
             'spotlight' => $spotlight,

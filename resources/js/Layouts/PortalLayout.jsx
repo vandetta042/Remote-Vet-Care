@@ -9,9 +9,11 @@ const roleConfig = {
         label: 'Owner Portal',
         dashboardRoute: 'owner.dashboard',
         links: [
-            { label: 'Dashboard', routeName: 'owner.dashboard', matches: ['owner.dashboard'] },
+            { label: 'Home', routeName: 'owner.dashboard', matches: ['owner.dashboard'] },
+            { label: 'Report a Sick Animal', routeName: 'owner.cases.create', matches: ['owner.cases.create'] },
             { label: 'My Animals', routeName: 'owner.animals.index', matches: ['owner.animals.*'] },
-            { label: 'My Cases', routeName: 'owner.cases.index', matches: ['owner.cases.*'] },
+            { label: 'My Care Requests', routeName: 'owner.cases.index', matches: ['owner.cases.*'] },
+            { label: 'Vet Replies', routeName: 'owner.cases.index', matches: ['owner.cases.show'] },
         ],
     },
     vet: {
@@ -94,7 +96,7 @@ export default function PortalLayout({ title, header, children }) {
 
     return (
         <div className="min-h-screen bg-stone-100 text-stone-900">
-            <div className={`bg-gradient-to-r ${gradient}`}>
+            <div className={`sticky top-0 z-40 bg-gradient-to-r ${gradient}`}>
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-4">
                         <Link

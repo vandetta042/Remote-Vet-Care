@@ -1,4 +1,5 @@
 import StatusBadge from '@/Components/StatusBadge';
+import AnimalIllustration from '@/Components/AnimalIllustration';
 import OwnerLayout from '@/Layouts/OwnerLayout';
 import { Head, Link } from '@inertiajs/react';
 
@@ -10,20 +11,51 @@ export default function Show({ animal, recentCases }) {
         >
             <Head title={animal.name} />
 
-            <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-                <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-                    <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
-                        Animal Profile
-                    </p>
-                    <h2 className="mt-2 text-3xl font-semibold text-stone-900">
-                        {animal.name}
-                    </h2>
-                    <p className="mt-2 text-sm text-stone-600">
-                        {animal.species?.name}
-                        {animal.breed ? ` - ${animal.breed.name}` : ''}
-                    </p>
+            <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                <section className="space-y-6">
+                    <div className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+                        <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-center">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                                    Animal Profile
+                                </p>
+                                <h2 className="mt-3 text-3xl font-semibold text-stone-900">
+                                    {animal.name}
+                                </h2>
+                                <p className="mt-2 text-sm leading-6 text-stone-600">
+                                    {animal.species?.name}
+                                    {animal.breed ? ` - ${animal.breed.name}` : ''}
+                                </p>
 
-                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                                <div className="mt-5 flex flex-wrap gap-2">
+                                    <span className="rounded-full bg-stone-100 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700">
+                                        {animal.gender ?? 'Gender not set'}
+                                    </span>
+                                    <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                                        {animal.vaccination_status?.replaceAll('_', ' ') ?? 'Vaccination not set'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="overflow-hidden rounded-[2rem] border border-stone-200 bg-gradient-to-br from-amber-50 via-white to-stone-50">
+                                {animal.profile_photo_url ? (
+                                    <img
+                                        src={animal.profile_photo_url}
+                                        alt={animal.name}
+                                        className="h-72 w-full object-cover"
+                                    />
+                                ) : (
+                                    <AnimalIllustration
+                                        species={animal.species?.name ?? 'Animal'}
+                                        title={`${animal.name} profile`}
+                                        subtitle="A friendly profile helps owners feel ready before they send a care request."
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
                         <Info label="Age" value={animal.age ?? 'Not specified'} />
                         <Info label="Age Group" value={animal.age_group ?? 'Not specified'} />
                         <Info label="Gender" value={animal.gender ?? 'Not specified'} />
@@ -31,16 +63,18 @@ export default function Show({ animal, recentCases }) {
                         <Info label="Color" value={animal.color ?? 'Not specified'} />
                         <Info label="Vaccination" value={animal.vaccination_status ?? 'Not specified'} />
                         <Info label="Location" value={animal.location ?? 'Not specified'} />
+                        <Info label="Last Consultation" value={animal.last_consultation_at ?? 'Not available'} />
+                        <Info label="Upcoming Follow-up" value={animal.upcoming_follow_up_at ?? 'Not scheduled'} />
                     </div>
 
-                    <div className="mt-6 rounded-2xl bg-stone-50 p-4">
+                    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
                         <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
                             Medical History
                         </p>
                         <p className="mt-2 text-sm leading-6 text-stone-700">
                             {animal.medical_history || 'No medical history provided yet.'}
                         </p>
-                    </div>
+                    </section>
                 </section>
 
                 <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">

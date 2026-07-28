@@ -57,6 +57,11 @@ export default function Form({
             affected_species_note: submission?.metadata?.affected_species_note ?? '',
             severity_note: submission?.metadata?.severity_note ?? '',
             care_advice: submission?.metadata?.care_advice ?? '',
+            care_recommendations:
+                submission?.metadata?.care_recommendations ??
+                submission?.metadata?.care_advice ??
+                '',
+            care_urgency_level: submission?.metadata?.care_urgency_level ?? '',
         },
         symptoms:
             submission?.symptoms?.length > 0
@@ -297,6 +302,48 @@ export default function Form({
                             />
                         </Field>
                     </div>
+
+                    <div className="md:col-span-2">
+                        <Field
+                            label="Care Recommendations"
+                            error={errors['metadata.care_recommendations']}
+                        >
+                            <textarea
+                                className="mt-1 block min-h-28 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                value={data.metadata.care_recommendations}
+                                onChange={(e) =>
+                                    setData('metadata', {
+                                        ...data.metadata,
+                                        care_recommendations: e.target.value,
+                                    })
+                                }
+                                placeholder="Write one or more supportive care steps."
+                            />
+                        </Field>
+                    </div>
+
+                    <Field
+                        label="Care Urgency"
+                        error={errors['metadata.care_urgency_level']}
+                    >
+                        <select
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            value={data.metadata.care_urgency_level}
+                            onChange={(e) =>
+                                setData('metadata', {
+                                    ...data.metadata,
+                                    care_urgency_level: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">Select urgency</option>
+                            {['low', 'moderate', 'high', 'emergency'].map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
                 </div>
 
                 <DynamicSection

@@ -97,7 +97,7 @@ class VeterinaryCaseController extends Controller
             ->with('success', 'Veterinary response updated successfully.');
     }
 
-    /**
+        /**
      * @return array<int, array<string, mixed>>
      */
     protected function decodeSystemMatches(?string $storedSuggestion): array
@@ -108,7 +108,22 @@ class VeterinaryCaseController extends Controller
 
         $decoded = json_decode($storedSuggestion, true);
 
-        return is_array($decoded) ? $decoded : [];
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        // If the JSON is the full response object, extract the actual list of matches
+        $matches = $decoded['top_matches'] 
+            ?? $decoded['possible_conditions'] 
+            ?? $decoded;
+
+        // Ensure the extracted target is a valid list array
+        if (! is_array($matches)) {
+            return [];
+        }
+
+        // Clean out metadata keys like "urgency_label" or "system_suggestion" if they are present
+        return array_values(array_filter($matches, fn ($item) => is_array($item)));
     }
 
     /**
@@ -121,7 +136,26 @@ class VeterinaryCaseController extends Controller
         }
 
         return collect($matches)
-            ->map(fn (array $match) => "{$match['disease_name']} ({$match['score']}%)")
+            ->map(fn (array $match) => $this->summarizeMatchLabel($match))
             ->implode('; ');
+    }
+
+    /**
+     * @param  array<string, mixed>  $match
+     */
+    protected function summarizeMatchLabel(array $match): string
+    {
+        $name = $match['disease_name']
+            ?? $match['name']
+            ?? $match['condition']
+            ?? 'Possible condition';
+
+        $score = $match['score'] ?? $match['confidence'] ?? null;
+
+        if ($score === null) {
+            return $name;
+        }
+
+        return "{$name} ({$score}%)";
     }
 }

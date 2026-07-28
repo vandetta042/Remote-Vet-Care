@@ -58,7 +58,7 @@ export default function RoleLayout({
 
     return (
         <div className={joinClasses('min-h-screen', theme.shell)}>
-            <div className={`bg-gradient-to-r ${theme.banner} text-white`}>
+            <div className={`sticky top-0 z-40 bg-gradient-to-r ${theme.banner} text-white`}>
                 <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <Link href={route('dashboard')} className="flex items-center gap-3">

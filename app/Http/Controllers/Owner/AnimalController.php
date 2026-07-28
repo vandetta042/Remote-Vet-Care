@@ -10,6 +10,7 @@ use App\Models\Breed;
 use App\Models\Species;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,7 +25,7 @@ class AnimalController extends Controller
             ->get();
 
         return Inertia::render('Owner/Animals/Index', [
-            'animals' => $animals,
+            'animals' => $animals->map(fn (Animal $animal) => $this->presentAnimal($animal))->values(),
         ]);
     }
 
@@ -43,9 +44,12 @@ class AnimalController extends Controller
 
     public function store(StoreAnimalRequest $request): RedirectResponse
     {
+        $validated = $request->validated();
+
         $animal = Animal::create([
-            ...$request->validated(),
+            ...collect($validated)->except('profile_photo')->all(),
             'owner_id' => $request->user()->id,
+            'profile_photo_path' => $this->storeProfilePhoto($request, null),
         ]);
 
         return redirect()
@@ -63,7 +67,7 @@ class AnimalController extends Controller
             ->get(['id', 'title', 'status', 'urgency_level', 'created_at']);
 
         return Inertia::render('Owner/Animals/Show', [
-            'animal' => $animal,
+            'animal' => $this->presentAnimal($animal),
             'recentCases' => $recentCases,
         ]);
     }
@@ -87,10 +91,48 @@ class AnimalController extends Controller
     {
         abort_unless($animal->owner_id === $request->user()->id, 403);
 
-        $animal->update($request->validated());
+        $validated = $request->validated();
+        $profilePhotoPath = $animal->profile_photo_path;
+
+        if ($request->hasFile('profile_photo')) {
+            if ($profilePhotoPath) {
+                Storage::disk('public')->delete($profilePhotoPath);
+            }
+
+            $profilePhotoPath = $this->storeProfilePhoto($request, $animal);
+        }
+
+        $animal->update([
+            ...collect($validated)->except('profile_photo')->all(),
+            'profile_photo_path' => $profilePhotoPath,
+        ]);
 
         return redirect()
             ->route('owner.animals.show', $animal)
             ->with('success', 'Animal profile updated successfully.');
+    }
+
+    protected function storeProfilePhoto(Request $request, ?Animal $animal): ?string
+    {
+        if (! $request->hasFile('profile_photo')) {
+            return $animal?->profile_photo_path;
+        }
+
+        return $request->file('profile_photo')->store('animal-photos', 'public');
+    }
+
+    protected function presentAnimal(Animal $animal): array
+    {
+        $latestCase = $animal->veterinaryCases()->latest('created_at')->first();
+        $upcomingCase = $animal->veterinaryCases()
+            ->whereNotNull('follow_up_date')
+            ->orderBy('follow_up_date')
+            ->first();
+
+        return [
+            ...$animal->toArray(),
+            'last_consultation_at' => $latestCase?->created_at?->format('M j, Y'),
+            'upcoming_follow_up_at' => $upcomingCase?->follow_up_date?->format('M j, Y'),
+        ];
     }
 }

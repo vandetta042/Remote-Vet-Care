@@ -18,7 +18,7 @@ function CaseCard({ item }) {
                         </h3>
                         <p className="mt-2 text-sm text-stone-600">
                             Owner: {item.owner?.name ?? 'Unknown owner'}
-                            {item.assigned_vet ? ` • Vet: ${item.assigned_vet}` : ''}
+                            {item.assigned_vet ? ` - Vet: ${item.assigned_vet}` : ''}
                         </p>
                     </div>
 
@@ -53,6 +53,14 @@ function CaseCard({ item }) {
                     <p className="mt-3 text-xs text-stone-500">
                         Attachments: {item.attachments_count}
                     </p>
+                    {item.owner?.email ? (
+                        <a
+                            href={`mailto:${item.owner.email}`}
+                            className="mt-4 inline-flex rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-stone-700"
+                        >
+                            Email owner
+                        </a>
+                    ) : null}
                 </div>
             </div>
         </div>
